@@ -17,11 +17,6 @@
 > accuracy at a fraction of the cost of retraining and is **backbone-agnostic** — validated on
 > both the **Online-AN** and **STAEformer** backbones.
 
-<p align="center">
-  <!-- 🚧 TODO: methodology figure coming soon (see notebook/ours_method_spec.md for the spec). -->
-  <em>🚧 Methodology figure coming soon — spec in <a href="./notebook/ours_method_spec.md"><code>notebook/ours_method_spec.md</code></a>.</em>
-</p>
-
 ---
 
 ## 📖 Method
@@ -40,22 +35,23 @@ window, and node ids, so any pretrained forecaster plugs in unchanged (we report
    A small per-node MLP consuming `y_base`, the input window `x_in`, four temporal statistics
    (last / mean / std / OLS-slope) and a learnable per-node embedding, emitting a per-horizon
    affine `ŷ = γ ⊙ y_base + β` with `γ = 1 + 0.5·tanh(·)` (init 1) and `β = std·β_norm`
-   (init 0). The head is **zero-init**, so the calibrator is the **identity at start** — it
-   can only help, never hurt, before adaptation. The node table **grows automatically** as
+   (init 0). The head is **zero-init**, so the calibrator initially reproduces the frozen
+   backbone. The node table **grows automatically** as
    new sensors appear. (Legacy archs `residual / affine / adapter / …` remain selectable.)
 
 3. **Delayed-label online adaptation** ([`src/trainer/a2tta_trainer.py`](src/trainer/a2tta_trainer.py)).
    Test windows are processed in **true chronological order**; a window's ground truth is only
    revealed after its horizon `H` has physically elapsed — enforced by a
-   `pending → candidate_pool` queue, so **no label leakage** is possible. Each batch, the
-   **persistent** calibrator takes a few steps on the delayed-label pool (supervised L1 +
-   optional consistency + proximal-to-init).
+   `pending → candidate_pool` queue. Under the default strict protocol, the logical
+   evaluation batch contains one window and the **persistent** calibrator updates every
+   64 windows using only released labels (supervised L1 + optional consistency +
+   proximal-to-init).
 
 4. **Discardable local clone** ([`src/trainer/ctx_local.py`](src/trainer/ctx_local.py),
-   `--method tta_ctx_local` — *our method*). Before predicting each batch, the stable global
+   `--method tta_ctx_local` — *our method*). Before predicting each window, the stable global
    calibrator is **cloned**; the clone takes a few steps on pool samples **re-weighted by
    relevance to the current window** (time-of-day / day-of-week phase · input+base-prediction
-   cosine similarity · recency, softmax-normalised with an ESS guard), predicts the batch, and
+   cosine similarity · recency, softmax-normalised with an ESS guard), predicts that window, and
    is then **discarded** — so the global calibrator is never biased by any single context. On
    free delayed-label TTA this is the *only* mechanism we found that consistently beats
    adapting on all labels (all other sample-selection schemes are ablated below).
@@ -134,9 +130,12 @@ The processed tensors are large and are released separately — see
 > ☁️ **Cloud-disk download link:** `https://pan.baidu.com/s/1llz16kYY33TrWlKENNHC5A?pwd=xxtf code: xxtf`
 > ☁️ **Raw data Link:**   `https://pan.baidu.com/s/1BPuxL96npWlfRXDv38duww?pwd=xxtf code: xxtf`
 
-Place them under `data/<dataset>/{RawData,FastData,graph}/`; the configs already point there.
+Place tensors under `data/<dataset>/{RawData,FastData,graph}/` and the stable-ID sidecars
+under `data/sensor_metadata/<dataset>/<year>/sensor_metadata.csv`; the configs already point
+to the tensor directories.
 Datasets: **XXL expanding-sensor** benchmarks
-`pems03 … pems12` (2005–2025), where the sensor count grows by up to two orders of magnitude.
+`pems03 … pems12`, with dataset-specific year spans ending in 2025 and sensor
+counts that grow by up to two orders of magnitude.
 
 ---
 
@@ -155,6 +154,9 @@ python a2tta_main.py \
     --method tta_ctx_local --calibrator_arch film \
     --dataset PEMS05 --backbone_method TrafficStream --freeze_backbone 1 \
     --backbone_ckpt_logname oneline_st_an_pems05 --backbone_seed 51 \
+    --eval_batch_size 1 --adapt_every_windows 64 --label_delay_steps 12 \
+    --input_normalization train --sensor_id_mode metadata \
+    --sensor_metadata_root data/sensor_metadata \
     --gpuid 0 --seed 51
 ```
 
@@ -166,27 +168,37 @@ python a2tta_main.py \
     --method tta_ctx_local --calibrator_arch film \
     --dataset PEMS05 --backbone_method STAEFORMER --freeze_backbone 1 \
     --backbone_ckpt_logname retrain_staeformer_pems05 --backbone_seed 42 \
+    --eval_batch_size 1 --adapt_every_windows 64 --label_delay_steps 12 \
+    --input_normalization train --sensor_id_mode metadata \
+    --sensor_metadata_root data/sensor_metadata \
     --gpuid 0 --seed 51
 ```
 
 **Ablation-D** — sweep the five rows by changing only `--method` / `--calibrator_arch`:
 
 ```bash
-for cfg in "backbone -" "calibrator film" "tta_all film" \
-           "tta_ctx_local film" "tta_ctx_local affine"; do
-  set -- $cfg
+for method in backbone calibrator tta_all tta_ctx_local; do
   python a2tta_main.py --conf conf/PEMS05/a2tta_olan_pems05.json --dataset PEMS05 \
       --backbone_method TrafficStream --backbone_ckpt_logname oneline_st_an_pems05 \
-      --backbone_seed 51 --method "$1" --calibrator_arch "$2" --gpuid 0 --seed 51
+      --backbone_seed 51 --method "$method" --calibrator_arch film \
+      --eval_batch_size 1 --adapt_every_windows 64 --label_delay_steps 12 \
+      --input_normalization train --sensor_id_mode metadata \
+      --sensor_metadata_root data/sensor_metadata --gpuid 0 --seed 51
 done
+python a2tta_main.py --conf conf/PEMS05/a2tta_olan_pems05.json --dataset PEMS05 \
+    --backbone_method TrafficStream --backbone_ckpt_logname oneline_st_an_pems05 \
+    --backbone_seed 51 --method tta_ctx_local --calibrator_arch affine \
+    --eval_batch_size 1 --adapt_every_windows 64 --label_delay_steps 12 \
+    --input_normalization train --sensor_id_mode metadata \
+    --sensor_metadata_root data/sensor_metadata --gpuid 0 --seed 51
 ```
 
-**Full ablation matrix** on PEMS05 (all 6 variants × 5 seeds):
+**Core component variants** on PEMS05 (four variants × five seeds):
 
 ```bash
 bash scripts/a2tta_lite_pems05_run.sh
 # single seed / GPU:        GPU=0 SEEDS="51" bash scripts/a2tta_lite_pems05_run.sh
-# only the main method:     METHODS="a2tta_lite" bash scripts/a2tta_lite_pems05_run.sh
+# only the main method:     METHODS="tta_ctx_local" bash scripts/a2tta_lite_pems05_run.sh
 # quick sanity (1yr,4 bat): FAST_DEV_RUN=1 bash scripts/a2tta_lite_pems05_run.sh
 ```
 
@@ -202,7 +214,8 @@ Outputs:
 - summarize a CSV into a table with `python scripts/a2tta_summarize.py <csv>`
 
 Key knobs (env-overridable in the script, or CLI flags on `a2tta_main.py`):
-`ADAPT_LR`, `ADAPT_STEPS`, `BUDGET_FRAC`, `POOL_SIZE`, `LOCAL_STEPS`, `WARMUP_EPOCHS`,
+`ADAPT_LR`, `ADAPT_STEPS`, `ADAPT_EVERY_WINDOWS`, `LABEL_DELAY_STEPS`, `BUDGET_FRAC`,
+`POOL_SIZE`, `LOCAL_STEPS`, `WARMUP_EPOCHS`,
 `LAMBDA_CONS`, `LAMBDA_REG`, `HIDDEN_DIM`, `NODE_EMB_DIM`, and the active-score weights
 `--w_err / --w_unc / --w_shift / --w_recency`. Defaults (from the sensitivity study):
 `adapt_lr 1e-3 · adapt_steps 3 · candidate_pool_size 512 · budget_frac 0.25 · warmup 3 ·
@@ -217,9 +230,9 @@ Result tables (Markdown + LaTeX + a zoomable **vector PDF** rendering) live in
 
 | Table | File |
 |---|---|
-| Main results (12 models × 9 datasets, A2TTA on **both** backbones) | [`tables/main_table.md`](tables/main_table.md) · [`.pdf`](tables/main_table.pdf) |
+| Main results (30 methods × 10 datasets, A2TTA on **both** backbones) | [`tables/main_table.md`](tables/main_table.md) · [`.pdf`](tables/main_table.pdf) |
 | **Ablation-D** (component knock-out, both backbones) | [`tables/ablation.md`](tables/ablation.md) · [`.pdf`](tables/ablation.pdf) |
-| New-sensor generalisation (`a2tta-olan` / `a2tta-staef`) | [`tables/tsas_new_sensors.md`](tables/tsas_new_sensors.md) · [`.pdf`](tables/tsas_new_sensors.pdf) |
+| New-sensor generalisation (21 methods, including frozen STAEFormer and both A2TTA backbones) | [`tables/tsas_new_sensors.md`](tables/tsas_new_sensors.md) · [`.pdf`](tables/tsas_new_sensors.pdf) |
 
 Figures are reproducible notebooks in [`notebook/`](notebook/) (each embeds its rendered PNG so
 it displays without re-running; regeneration needs the released `run_logs/` summaries at repo
@@ -305,9 +318,10 @@ conda activate moirai && python moirai_main.py --conf conf/PEMS05/moirai_moe_pem
 python chronos_baseline.py --dataset PEMS05 --gpuid 0
 ```
 
-All FM predictions are scored with the **same `cal_metric`** as every other method, so the
-numbers are directly comparable. Foundation-model columns are **excluded from the best/second
-highlighting** in the tables (they are reference points, not the contribution).
+All FM predictions use the **same test windows and `cal_metric`** as the other methods.
+The FT variants use a 20% per-year few-shot training slice, whereas the conventional
+trained spatiotemporal baselines use the 60% training split. Foundation-model columns are
+therefore presented as references and are **excluded from best/second highlighting**.
 
 > **Wrappers:** [`src/model/timesfm_wrapper.py`](src/model/timesfm_wrapper.py),
 > [`src/model/moirai_wrapper.py`](src/model/moirai_wrapper.py); TimesFM uses a RevIN patch

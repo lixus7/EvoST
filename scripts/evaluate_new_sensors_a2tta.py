@@ -2,9 +2,10 @@
 """
 evaluate_new_sensors_a2tta.py
 
-Re-run **A2TTA-Lite** (Ours) online test-time adaptation per year and report
-MAE / RMSE / MAPE restricted to the **newly added sensors** (node indices
-[prev_year_N, cur_year_N)). Output mirrors scripts/evaluate_new_sensors.py so
+Re-run **A2TTA** online test-time adaptation per year and report MAE / RMSE /
+MAPE restricted to the **newly added sensors**. New sensors are identified by
+stable metadata IDs absent from the preceding year; yearly matrix rows are not
+assumed to be append-only. Output mirrors scripts/evaluate_new_sensors.py so
 make_new_sensor_tables.py can merge it like any other baseline.
 
 Why a separate script: A2TTA produces its predictions *online* (causal, with
@@ -43,6 +44,7 @@ import networkx as nx
 import torch
 
 from utils.initialize import init, seed_anything, init_log
+from utils.common_tools import mkdirs
 import a2tta_main as A
 import src.trainer.a2tta_trainer as a2t
 from src.model.a2tta import ResidualCalibrator
@@ -72,14 +74,19 @@ A2TTA_HP = dict(
     w_recency=0.1,
     warmup_epochs=3,
     warmup_lr=1e-3,
-    eval_batch_size=64,
+    adapt_every_windows=64,
+    label_delay_steps=12,
+    eval_batch_size=1,
+    input_normalization="train",
+    sensor_id_mode="metadata",
     fast_dev_run=0,
 )
 
 
 def _build_args(conf_path, seed, gpuid, dataset, fast_dev_run,
                 method=None, logname=None, backbone_method=None,
-                backbone_ckpt_logname=None, backbone_seed=None, infer_chunk=None):
+                backbone_ckpt_logname=None, backbone_seed=None, infer_chunk=None,
+                sensor_metadata_root=None):
     lower = dataset.lower()
     p = A._build_parser()
     args = p.parse_args([])  # all parser args have defaults
@@ -92,20 +99,6 @@ def _build_args(conf_path, seed, gpuid, dataset, fast_dev_run,
     # Backbone ckpt logname (default OL-AN; override for STAEformer etc).
     args.backbone_ckpt_logname = backbone_ckpt_logname or f"oneline_st_an_{lower}"
     args.backbone_ckpt_logname_fallback = backbone_ckpt_logname or f"retrain_st_{lower}"
-    for k, v in A2TTA_HP.items():
-        setattr(args, k, v)
-    # Overrides. Default method = tta_ctx_local (full Ours; calibrator_arch=film
-    # and local_steps=3 come from the parser/HP defaults).
-    if method:
-        args.method = method
-    if backbone_method:
-        args.backbone_method = backbone_method
-    if backbone_seed is not None:
-        args.backbone_seed = backbone_seed
-    if infer_chunk is not None:
-        args.infer_chunk = infer_chunk
-    args.fast_dev_run = int(fast_dev_run)
-
     args.device = (
         torch.device(f"cuda:{gpuid}")
         if torch.cuda.is_available() and gpuid != -1
@@ -114,6 +107,29 @@ def _build_args(conf_path, seed, gpuid, dataset, fast_dev_run,
     args.methods = A.METHOD_REGISTRY
 
     init(args)            # merge conf JSON into args, set args.path = log/<DS>/<logname>-<seed>
+    # Programmatic overrides must be applied after ``init`` because the shared
+    # initializer loads the JSON last.
+    for k, v in A2TTA_HP.items():
+        setattr(args, k, v)
+    if method:
+        args.method = method
+    if backbone_method:
+        args.backbone_method = backbone_method
+    if backbone_seed is not None:
+        args.backbone_seed = backbone_seed
+    if infer_chunk is not None:
+        args.infer_chunk = infer_chunk
+    if sensor_metadata_root is not None:
+        args.sensor_metadata_root = sensor_metadata_root
+    args.fast_dev_run = int(fast_dev_run)
+    # `init()` merges the JSON after the CLI values and therefore replaces
+    # args.logname with the config's value. Honour an explicit output logname
+    # after that merge so alternate evaluations (for example the frozen
+    # STAEFormer backbone) cannot overwrite the A2TTA run's CSV/log directory.
+    if logname is not None:
+        args.logname = logname
+        args.path = osp.join(args.model_path, f"{args.logname}-{args.seed}")
+        mkdirs(args.path)
     seed_anything(args.seed)
     init_log(args)        # attach logger writing into <path>/<logname>.log
     A._stash_a2tta_cfg(args)
@@ -122,47 +138,47 @@ def _build_args(conf_path, seed, gpuid, dataset, fast_dev_run,
 
 def evaluate(conf_path, seed, gpuid, dataset, fast_dev_run=0,
              method=None, logname=None, backbone_method=None,
-             backbone_ckpt_logname=None, backbone_seed=None, infer_chunk=None):
+             backbone_ckpt_logname=None, backbone_seed=None, infer_chunk=None,
+             sensor_metadata_root=None):
     args = _build_args(conf_path, seed, gpuid, dataset, fast_dev_run,
                        method=method, logname=logname,
                        backbone_method=backbone_method,
                        backbone_ckpt_logname=backbone_ckpt_logname,
-                       backbone_seed=backbone_seed, infer_chunk=infer_chunk)
+                       backbone_seed=backbone_seed, infer_chunk=infer_chunk,
+                       sensor_metadata_root=sensor_metadata_root)
     seed_dir = args.path
     out_csv = osp.join(seed_dir, "eval_new_sensors.csv")
 
     rows = []
     new_metrics, all_metrics = {}, {}
-    prev = {"size": None}  # previous year's node count, tracked across the year walk
-
     def capturing_cal_metric(truth, pred, _args):
         """Replaces utils.metric.cal_metric inside online_a2tta_eval.
 
         truth/pred: [windows, N, T]. Records all-sensor metrics (sanity) and,
-        when the graph grew vs the previous evaluated year, new-sensor metrics.
+        for stable IDs that were absent from the preceding year.
         """
         year = _args.year
         n = truth.shape[1]
-        prev_size = prev["size"]
+        new_indices = np.asarray(
+            getattr(_args, "sensor_new_local_indices", []), dtype=np.int64
+        )
+        new_count = int(new_indices.size)
 
         am = _slice_metrics(truth, pred, slice(0, n))
         if am is not None:
             all_metrics[year] = am
             for k in am:  # every horizon key: cumulative 1..12, step1..12, Avg
-                rows.append([year, n, 0, "all", k, *am[k]])
+                rows.append([year, n, new_count, "all", k, *am[k]])
 
-        if prev_size is not None and n > prev_size:
-            new_count = n - prev_size
-            nm = _slice_metrics(truth, pred, slice(prev_size, n))
+        if new_count:
+            nm = _slice_metrics(truth, pred, new_indices)
             if nm is not None:
                 new_metrics[year] = nm
                 for k in nm:  # every horizon key: cumulative 1..12, step1..12, Avg
                     rows.append([year, n, new_count, "new", k, *nm[k]])
                 _args.logger.info(
-                    f"  [new-sensors] year={year} N={n} new={new_count} "
-                    f"(idx {prev_size}..{n - 1})"
+                    f"  [new-sensors] year={year} N={n} new_ids={new_count}"
                 )
-        prev["size"] = n
 
     # Patch the single per-year metric call the online evaluator makes.
     a2t.cal_metric = capturing_cal_metric
@@ -195,6 +211,7 @@ def evaluate(conf_path, seed, gpuid, dataset, fast_dev_run=0,
     ).to(args.device)
 
     args.graph_size_list = []
+    args._sensor_id_registry = {}
     for year in range(args.begin_year, args.end_year + 1):
         try:
             A._run_year(args, year, calibrator)
@@ -236,7 +253,7 @@ if __name__ == "__main__":
     ap.add_argument("--fast_dev_run", type=int, default=0)
     ap.add_argument("--method", default=None,
                     help="override A2TTA method (e.g. tta_ctx_local = full Ours). "
-                         "Default None keeps the legacy a2tta_lite.")
+                         "Default is tta_ctx_local (full Ours).")
     ap.add_argument("--logname", default=None,
                     help="override output logname dir (default a2tta_lite_<ds>).")
     ap.add_argument("--backbone_method", default=None,
@@ -247,9 +264,15 @@ if __name__ == "__main__":
                     help="backbone ckpt seed suffix (STAE: tta_seed-9).")
     ap.add_argument("--infer_chunk", type=int, default=None,
                     help="no-grad backbone inference chunk (STAE dense graphs).")
+    ap.add_argument(
+        "--sensor_metadata_root",
+        default=osp.join(ROOT, "data", "sensor_metadata"),
+        help="root containing <dataset>/<year>/sensor_metadata.csv",
+    )
     a = ap.parse_args()
     evaluate(a.conf, a.seed, a.gpuid, a.dataset, a.fast_dev_run,
              method=a.method, logname=a.logname,
              backbone_method=a.backbone_method,
              backbone_ckpt_logname=a.backbone_ckpt_logname,
-             backbone_seed=a.backbone_seed, infer_chunk=a.infer_chunk)
+             backbone_seed=a.backbone_seed, infer_chunk=a.infer_chunk,
+             sensor_metadata_root=a.sensor_metadata_root)

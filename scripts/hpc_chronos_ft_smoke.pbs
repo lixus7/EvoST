@@ -18,6 +18,8 @@ resolve_repo() {
 }
 
 REPO=$(resolve_repo)
+export A2TTA_DATA_ROOT=${A2TTA_DATA_ROOT:-"$REPO/data"}
+export A2TTA_TFNSW_ROOT=${A2TTA_TFNSW_ROOT:-"$REPO/data/tfnsw"}
 PYTHON=${A2TTA_PYTHON:-}
 if [[ -z "$PYTHON" ]]; then
     PYTHON=$(command -v python3 || command -v python || true)
@@ -50,8 +52,6 @@ if [[ "$MODEL" == /* && ! -e "$MODEL" ]]; then
 fi
 
 mkdir -p "$WORK_DIR" "$OUT_DIR"
-ln -s "$REPO/../xxltrafficdata" "$LOCAL_ROOT/xxltrafficdata"
-ln -s "$REPO/../tfnsw" "$LOCAL_ROOT/tfnsw"
 
 export PYTHONNOUSERSITE=1
 export PYTHONUNBUFFERED=1

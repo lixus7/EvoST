@@ -25,7 +25,19 @@ ENV_NAME=${ENV_NAME:-moirai}
 PY_VER=${PY_VER:-3.11}              # uni2ts needs >=3.10
 REPO_ROOT=${REPO_ROOT:-.}
 export HF_HOME=${HF_HOME:-./hf_cache}
-CONDA_SH=${CONDA_SH:-$CONDA
+if [[ -z "${CONDA_SH:-}" ]]; then
+    if command -v conda >/dev/null 2>&1; then
+        CONDA_BASE=$(conda info --base)
+        CONDA_SH="$CONDA_BASE/etc/profile.d/conda.sh"
+    else
+        echo "[setup] ERROR: conda not found; set CONDA_SH to conda.sh" >&2
+        exit 1
+    fi
+fi
+[[ -f "$CONDA_SH" ]] || {
+    echo "[setup] ERROR: conda initialization script not found: $CONDA_SH" >&2
+    exit 1
+}
 # uni2ts pins torch>=2.1,<2.5. torch 2.4.1 cu121 supports H200 (sm_90).
 TORCH_PIP=${TORCH_PIP:-'torch==2.4.1 --index-url https://download.pytorch.org/whl/cu121'}
 UNI2TS_PIP=${UNI2TS_PIP:-'uni2ts==2.0.0'}     # first PyPI release with Moirai-2.0

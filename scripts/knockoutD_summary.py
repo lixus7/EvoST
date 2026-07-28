@@ -1,12 +1,15 @@
 """
 Summarise Ablation-D (knockout / leave-one-out) jobs.
 
-Per-job CSVs tagged  KO_<bb>__<P#>__<method>__<arch>__s<seed>.csv
+Per-job CSVs tagged either
+  KO_<bb>__<P#>__<method>__<arch>__s<seed>.csv
+or
+  KO2_<bb>__<##>__<method>__<arch>__s<seed>.csv
 (bb in {an, stae}). For each (backbone, dataset) prints a markdown table:
   MAE@3 / @6 / @12 / Avg  (mean +/- std over seeds; years averaged per seed)
   + Delta Avg vs the Ours(full) row.
 
-Usage: python scripts/knockoutD_summary.py run_logs/koD_<ts>
+Usage: python scripts/knockoutD_summary.py <ablation-result-root>
 """
 from __future__ import annotations
 import csv, glob, os.path as osp, sys
@@ -14,7 +17,7 @@ from collections import defaultdict
 import numpy as np
 
 TAG_RE = __import__("re").compile(
-    r"^KO_(an|stae)__(P\d+)__([a-z_]+)__([a-z]+)__s(\d+)\.csv$")
+    r"^KO2?_(an|stae)__(P?\d+)__([a-z_]+)__([a-z]+)__s(\d+)\.csv$")
 HZ = ["3", "6", "12", "Avg"]
 
 BB_LABEL = {"an": "Online-AN (TrafficStream)", "stae": "STAEformer"}
@@ -55,14 +58,18 @@ def perhz_per_seed(paths):
     return out
 
 
+def normalise_dataset(raw):
+    return f"PEMS{int(raw.lstrip('P')):02d}"
+
+
 def main(root):
     groups = defaultdict(list)  # (bb, ds) -> [csv paths]
-    for p in sorted(glob.glob(osp.join(root, "csv", "KO_*.csv"))):
+    for p in sorted(glob.glob(osp.join(root, "csv", "KO*.csv"))):
         m = TAG_RE.match(osp.basename(p))
         if m:
-            groups[(m.group(1), m.group(2))].append(p)
+            groups[(m.group(1), normalise_dataset(m.group(2)))].append(p)
     if not groups:
-        print(f"[!] no KO_*.csv under {osp.join(root, 'csv')}")
+        print(f"[!] no KO*.csv under {osp.join(root, 'csv')}")
         return
 
     order = sorted(ROW.values(), key=lambda t: t[1])
@@ -99,6 +106,6 @@ def main(root):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("usage: python scripts/knockoutD_summary.py run_logs/koD_<ts>")
+        print("usage: python scripts/knockoutD_summary.py <ablation-result-root>")
         sys.exit(1)
     main(sys.argv[1])

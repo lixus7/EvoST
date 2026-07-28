@@ -1,370 +1,450 @@
 #!/usr/bin/env python3
+"""Build the corrected newly-added-sensor result tables.
+
+The table combines three independently generated result layers:
+
+* non-STAEFormer baselines, stored as per-dataset ``summary.csv`` files;
+* frozen STAEFormer, stored in the same summary format;
+* A2TTA on Online-AN and STAEFormer, stored as per-run detail CSVs.
+
+Only ``scope=new`` is used. A2TTA detail files must record the strict
+chronological protocol (batch size 1, 12-window label delay, 64-window update
+cadence, training-only normalization, and metadata sensor identities).
 """
-make_new_sensor_tables.py
+from __future__ import annotations
 
-Reads all `summary.csv` produced by `eval_new_sensors_run.sh` (under
-run_logs/eval_new_sensors_*/) and emits Markdown + LaTeX tables of
-*newly-added-sensor* MAE/RMSE/MAPE for horizon 3, 6, 12, Avg.
-
-Layout matches tables/tsas_main_table_part{1,2}.tex:
-  4 column groups: Static STGNN Backbones | Naive Schemes | Evolving-Graph Continual | Retrieval/TTC
-  Per (dataset, metric, horizon) row, **bold** = best, \\underline{} = 2nd best.
-  Two .tex files mirroring the part1/part2 dataset split.
-
-Inputs : run_logs/eval_new_sensors_*/summary.csv  (scope=new only)
-Outputs in <repo_root>/tables/:
-  tsas_new_sensors_part1.tex   PEMS03/04/05/06/07
-  tsas_new_sensors_part2.tex   PEMS08/10/11/12
-  tsas_new_sensors.md          all datasets present, same column layout
-"""
+import argparse
 import csv
-import glob
-import os
-import os.path as osp
-import sys
 from collections import defaultdict
+from pathlib import Path
+from statistics import mean, stdev
 
-HERE = osp.dirname(osp.abspath(__file__))
-ROOT = osp.dirname(HERE)
-REPO = osp.dirname(ROOT)
-TABLES_DIR = osp.join(REPO, "tables")
 
-_ALL_SUMMARIES = sorted(glob.glob(osp.join(ROOT, "run_logs", "eval_new_sensors_*", "summary.csv")))
-if not _ALL_SUMMARIES:
-    print("[error] no run_logs/eval_new_sensors_*/summary.csv found", file=sys.stderr)
-    sys.exit(1)
-# Merge ALL summary.csv files, deduping by (dataset, method, seed): later runs
-# override earlier ones for the same key. The folder names embed timestamps
-# (eval_new_sensors_YYYYMMDD_HHMMSS), so sorted order == chronological order
-# and the last write wins. This lets you run a single method (e.g. STKEC) in
-# a fresh batch and have it merged into the existing 13-method table without
-# losing or double-counting anything.
-#
-# Override with EVAL_SUMMARIES="path1 path2 ..." to restrict.
-_ENV_OVERRIDE = os.environ.get("EVAL_SUMMARIES", "").strip()
-if _ENV_OVERRIDE:
-    SUMMARIES = _ENV_OVERRIDE.split()
-else:
-    SUMMARIES = _ALL_SUMMARIES
-print(f"[*] merging {len(SUMMARIES)} summary csv(s) (dedup by ds/method/seed, latest wins):")
-for p in SUMMARIES:
-    print(f"      {p}")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DATASETS = (
+    "PEMS03", "PEMS04", "PEMS05", "PEMS06", "PEMS07",
+    "PEMS08", "PEMS10", "PEMS11", "PEMS12", "TFNSW",
+)
+DATASET_PART1 = DATASETS[:5]
+DATASET_PART2 = DATASETS[5:]
+HORIZONS = ("3", "6", "12", "Avg")
+METRICS = ("MAE", "RMSE", "MAPE")
 
-# ---------------------------------------------------------------------------
-# Column schema — mirrors tables/tsas_main_table_part1.tex order exactly.
-# Each entry: (group, column_label, slug_in_summary_csv).
-# ---------------------------------------------------------------------------
-COLUMNS = [
-    ("Static STGNN Backbones",  "DCRNN",          "retrain_dcrnn"),
-    ("Static STGNN Backbones",  "ASTGNN",         "retrain_astgnn"),
-    ("Static STGNN Backbones",  "TGCN",           "retrain_tgcn"),
-    ("Static STGNN Backbones",  "GWN",            "retrain_gwn"),
+# (group, display label, result slug)
+COLUMNS = (
+    ("Static STGNN Backbones", "DCRNN", "retrain_dcrnn"),
+    ("Static STGNN Backbones", "ASTGNN", "retrain_astgnn"),
+    ("Static STGNN Backbones", "TGCN", "retrain_tgcn"),
+    ("Static STGNN Backbones", "GWN", "retrain_gwn"),
+    (r'Na\"ive Schemes', "Pretrain", "pretrain_st"),
+    (r'Na\"ive Schemes', "Retrain", "retrain_st"),
+    (r'Na\"ive Schemes', "OL-NN", "oneline_st_nn"),
+    (r'Na\"ive Schemes', "OL-AN", "oneline_st_an"),
+    ("Evolving-Graph Continual", "TrafStm", "trafficstream"),
+    ("Evolving-Graph Continual", "PECPM", "pecpm"),
+    ("Evolving-Graph Continual", "STKEC", "stkec"),
+    ("Evolving-Graph Continual", "EAC", "eac"),
+    ("Retrieval / TTC", "STRAP", "strap"),
+    ("Retrieval / TTC", "ST-TTC", "sttc"),
+    ("Other Static Backbones", "STID", "retrain_stid"),
+    ("Other Static Backbones", "STNorm", "retrain_stnorm"),
+    ("Other Static Backbones", "iTrans", "retrain_itransformer"),
+    ("Other Static Backbones", "DLinear", "retrain_dlinear"),
+    ("Static Transformer", "STAEFormer", "retrain_staeformer"),
+    ("Ours", "A2TTA (OL-AN)", "a2tta_lite"),
+    ("Ours", "A2TTA (STAE)", "a2tta_staef"),
+)
+BASELINE_METHODS = {slug for _group, _label, slug in COLUMNS[:18]}
+PLAIN_STAE_METHOD = "retrain_staeformer"
+A2TTA_METHODS = {"a2tta_lite", "a2tta_staef"}
+EXPECTED_METHODS = tuple(slug for _group, _label, slug in COLUMNS)
+BACKBONE_TO_METHOD = {
+    "trafficstream": "a2tta_lite",
+    "staeformer": "a2tta_staef",
+}
 
-    (r'Na\"ive Schemes',        "Pretrain",       "pretrain_st"),
-    (r'Na\"ive Schemes',        "Retrain",        "retrain_st"),
-    (r'Na\"ive Schemes',        "OL-NN",          "oneline_st_nn"),
-    (r'Na\"ive Schemes',        "OL-AN",          "oneline_st_an"),
+# (dataset, method, horizon, seed) -> metric dictionary
+SeedKey = tuple[str, str, str, str]
 
-    ("Evolving-Graph Continual", "TrafStm",       "trafficstream"),
-    ("Evolving-Graph Continual", "PECPM",         "pecpm"),
-    ("Evolving-Graph Continual", "STKEC",         "stkec"),
-    ("Evolving-Graph Continual", "EAC",           "eac"),
 
-    ("Retrieval / TTC",         "STRAP",          "strap"),
-    ("Retrieval / TTC",         "ST-TTC",         "sttc"),
+def _summary_files(run_root: Path) -> list[Path]:
+    files = sorted((run_root / "datasets").glob("*/summary.csv"))
+    observed = {path.parent.name for path in files}
+    missing = sorted(set(DATASETS) - observed)
+    if missing:
+        raise FileNotFoundError(
+            f"{run_root} is missing dataset summaries: {', '.join(missing)}"
+        )
+    return files
 
-    ("Other Static Backbones",  "STID",           "retrain_stid"),
-    ("Other Static Backbones",  "STNorm",         "retrain_stnorm"),
-    ("Other Static Backbones",  "iTrans",         "retrain_itransformer"),
-    ("Other Static Backbones",  "DLinear",        "retrain_dlinear"),
 
-    ("Ours",                    "a2tta-olan",     "a2tta_lite"),
-    ("Ours",                    "a2tta-staef",    "a2tta_staef"),
-]
+def _read_summary_layer(
+    run_root: Path,
+    allowed_methods: set[str],
+) -> dict[SeedKey, dict[str, float]]:
+    values: dict[SeedKey, dict[str, float]] = {}
+    for path in _summary_files(run_root):
+        with path.open(newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                if row["scope"] != "new" or row["method"] not in allowed_methods:
+                    continue
+                sensor_mode = row.get("sensor_id_mode", "")
+                if sensor_mode and sensor_mode != "metadata_id_difference":
+                    raise ValueError(
+                        f"unexpected sensor_id_mode={sensor_mode!r} in {path}"
+                    )
+                key = (
+                    row["dataset"], row["method"], row["horizon"], str(row["seed"])
+                )
+                current = {metric: float(row[metric]) for metric in METRICS}
+                if key in values and values[key] != current:
+                    raise ValueError(f"conflicting duplicate summary row {key} in {path}")
+                values[key] = current
+    return values
 
-DATASET_PART1 = ["PEMS03", "PEMS04", "PEMS05", "PEMS06", "PEMS07"]
-DATASET_PART2 = ["PEMS08", "PEMS10", "PEMS11", "PEMS12", "TFNSW"]
-HORIZONS = ["3", "6", "12", "Avg"]
-METRICS = ["MAE", "RMSE", "MAPE"]
-SCOPE = "new"
 
-# Lower-is-better for all three.
-# ---------------------------------------------------------------------------
+def _select_a2tta_detail_files(run_roots: list[Path]) -> list[Path]:
+    """Select the newest file for each dataset/backbone/seed combination."""
+    selected: dict[tuple[str, str, str], tuple[int, int, Path]] = {}
+    for run_order, run_root in enumerate(run_roots):
+        files = sorted((run_root / "detail").glob("*.csv"))
+        if not files:
+            raise FileNotFoundError(f"no detail CSVs under {run_root / 'detail'}")
+        for path in files:
+            with path.open(newline="", encoding="utf-8") as handle:
+                first = next(csv.DictReader(handle), None)
+            if first is None:
+                raise ValueError(f"empty detail CSV: {path}")
+            method = BACKBONE_TO_METHOD.get(first["backbone_method"].lower())
+            if method is None:
+                raise ValueError(
+                    f"unknown backbone_method={first['backbone_method']!r} in {path}"
+                )
+            key = (first["dataset"], method, str(first["seed"]))
+            candidate = (path.stat().st_mtime_ns, run_order, path)
+            if key not in selected or candidate[:2] > selected[key][:2]:
+                selected[key] = candidate
+    return [candidate[2] for candidate in selected.values()]
 
-# Dedup by (dataset, method, horizon, seed): later summary overrides earlier.
-# Each summary.csv is processed in chronological order (SUMMARIES is sorted by
-# timestamped folder name), so the final value per (ds, m, h, seed) is the
-# most recent re-evaluation of that exact run.
-# raw[(ds, method, horizon, seed)] = {"MAE": ..., "RMSE": ..., "MAPE": ...}
-raw = {}
-for path in SUMMARIES:
-    with open(path) as f:
-        for r in csv.DictReader(f):
-            if r["scope"] != SCOPE:
+
+def _read_a2tta_layer(run_roots: list[Path]) -> dict[SeedKey, dict[str, float]]:
+    values: dict[SeedKey, dict[str, float]] = {}
+    for path in _select_a2tta_detail_files(run_roots):
+        with path.open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        first = rows[0]
+        dataset = first["dataset"]
+        seed = str(first["seed"])
+        method = BACKBONE_TO_METHOD[first["backbone_method"].lower()]
+
+        identity = {
+            (
+                row["dataset"],
+                row["method"],
+                row["backbone_method"].lower(),
+                str(row["seed"]),
+            )
+            for row in rows
+        }
+        expected_identity = {
+            (dataset, "tta_ctx_local", first["backbone_method"].lower(), seed)
+        }
+        if identity != expected_identity:
+            raise ValueError(f"mixed run identity in {path}: {sorted(identity)}")
+
+        protocol = {
+            (
+                row["label_delay_steps"],
+                row["eval_batch_size"],
+                row["adapt_every_windows"],
+                row["input_normalization"],
+                row["sensor_id_mode"],
+            )
+            for row in rows
+        }
+        if protocol != {("12", "1", "64", "train", "metadata")}:
+            raise ValueError(f"non-strict or mixed A2TTA protocol in {path}: {protocol}")
+
+        by_horizon: dict[str, list[dict[str, float]]] = defaultdict(list)
+        seen_years: dict[str, set[str]] = defaultdict(set)
+        for row in rows:
+            if row["scope"] != "new":
                 continue
-            k = (r["dataset"], r["method"], r["horizon"], r["seed"])
-            raw[k] = {m: float(r[m]) for m in METRICS}
+            horizon = row["horizon"]
+            if row["year"] in seen_years[horizon]:
+                raise ValueError(
+                    f"duplicate new-sensor year/horizon in {path}: "
+                    f"{row['year']}/{horizon}"
+                )
+            seen_years[horizon].add(row["year"])
+            by_horizon[horizon].append(
+                {metric: float(row[metric]) for metric in METRICS}
+            )
 
-# Fold into rows_by_key (list of seed-level scalars) + seen_seeds set
-rows_by_key = defaultdict(list)
-seen_seeds = defaultdict(set)
-for (ds, method, horizon, seed), vals in raw.items():
-    seen_seeds[(ds, method, horizon)].add(seed)
-    for m in METRICS:
-        rows_by_key[(ds, method, horizon, m)].append(vals[m])
-
-
-def _agg(vals):
-    if not vals:
-        return None, None
-    n = len(vals)
-    mean = sum(vals) / n
-    if n > 1:
-        var = sum((v - mean) ** 2 for v in vals) / (n - 1)
-        std = var ** 0.5
-    else:
-        std = 0.0
-    return mean, std
+        for horizon, yearly in by_horizon.items():
+            values[(dataset, method, horizon, seed)] = {
+                metric: mean(row[metric] for row in yearly)
+                for metric in METRICS
+            }
+    return values
 
 
-def _rank(values):
-    """Return (best_idx_set, second_idx_set) over a list of (mean, std) where
-    None entries are ignored. Lower is better."""
-    valid = [(i, v[0]) for i, v in enumerate(values) if v[0] is not None]
-    if not valid:
-        return set(), set()
-    valid.sort(key=lambda x: x[1])
-    best = valid[0][1]
-    best_set = {i for i, v in valid if abs(v - best) < 1e-9}
-    rest = [v for v in valid if v[0] not in best_set]
-    if not rest:
-        return best_set, set()
-    second = rest[0][1]
-    second_set = {i for i, v in rest if abs(v - second) < 1e-9}
-    return best_set, second_set
+def _validate_coverage(
+    values: dict[SeedKey, dict[str, float]], expected_seeds: int
+) -> None:
+    coverage: dict[tuple[str, str], set[str]] = defaultdict(set)
+    horizons: dict[tuple[str, str, str], set[str]] = defaultdict(set)
+    for dataset, method, horizon, seed in values:
+        coverage[(dataset, method)].add(seed)
+        horizons[(dataset, method, seed)].add(horizon)
+
+    bad_seeds = {
+        (dataset, method): sorted(coverage.get((dataset, method), set()))
+        for dataset in DATASETS
+        for method in EXPECTED_METHODS
+        if len(coverage.get((dataset, method), set())) != expected_seeds
+    }
+    if bad_seeds:
+        raise ValueError(f"incomplete seed coverage: {bad_seeds}")
+
+    missing_horizons = {
+        key: sorted(set(HORIZONS) - present)
+        for key, present in horizons.items()
+        if set(HORIZONS) - present
+    }
+    if missing_horizons:
+        raise ValueError(f"missing published horizons: {missing_horizons}")
+
+    expected_groups = len(DATASETS) * len(EXPECTED_METHODS) * expected_seeds
+    observed_groups = len(
+        {
+            (dataset, method, seed)
+            for dataset, method, _horizon, seed in values
+        }
+    )
+    if observed_groups != expected_groups:
+        raise ValueError(
+            f"coverage mismatch: observed {observed_groups}, expected {expected_groups}"
+        )
+    print(
+        f"[coverage] {len(DATASETS)} datasets x {len(EXPECTED_METHODS)} methods "
+        f"x {expected_seeds} seeds = {observed_groups} groups"
+    )
 
 
-# ---------------------------------------------------------------------------
-# Datasets actually populated (any cell in any group).
-# ---------------------------------------------------------------------------
-present_ds = set()
-present_slug = set()
-for (ds, slug, *_), vals in rows_by_key.items():
-    if vals:
-        present_ds.add(ds)
-        present_slug.add(slug)
+def _aggregate(values):
+    buckets: dict[tuple[str, str, str, str], list[float]] = defaultdict(list)
+    for (dataset, method, horizon, _seed), metrics in values.items():
+        for metric, value in metrics.items():
+            buckets[(dataset, method, horizon, metric)].append(value)
+    return {
+        key: (mean(items), stdev(items) if len(items) > 1 else 0.0)
+        for key, items in buckets.items()
+    }
 
 
-# ---------------------------------------------------------------------------
-# LaTeX
-# ---------------------------------------------------------------------------
-def _fmt_tex(mean, std, is_best, is_second):
-    if mean is None:
-        return "--"
-    s = f"{mean:.2f}$_{{\\pm{std:.2f}}}$"
-    if is_best:
-        return f"\\textbf{{{mean:.2f}$_{{\\pm{std:.2f}}}$}}"
-    if is_second:
-        return f"\\underline{{{mean:.2f}$_{{\\pm{std:.2f}}}$}}"
-    return s
+def _rank(items):
+    ordered = sorted(
+        ((index, value[0]) for index, value in enumerate(items)),
+        key=lambda item: item[1],
+    )
+    best_value = ordered[0][1]
+    best = {index for index, value in ordered if abs(value - best_value) < 1e-9}
+    remaining = [(index, value) for index, value in ordered if index not in best]
+    if not remaining:
+        return best, set()
+    second_value = remaining[0][1]
+    second = {
+        index for index, value in remaining
+        if abs(value - second_value) < 1e-9
+    }
+    return best, second
 
 
-def build_tex(datasets, *, caption, label):
-    # Group span widths in column order
-    group_spans = []
-    last = None
-    for grp, _lbl, _slug in COLUMNS:
-        if grp == last:
-            group_spans[-1] = (grp, group_spans[-1][1] + 1)
+def _fmt_md(value, best: bool, second: bool) -> str:
+    text = f"{value[0]:.2f} ± {value[1]:.2f}"
+    if best:
+        return f"**{text}**"
+    if second:
+        return f"_{text}_"
+    return text
+
+
+def _fmt_tex(value, best: bool, second: bool) -> str:
+    text = f"{value[0]:.2f}$_{{\\pm{value[1]:.2f}}}$"
+    if best:
+        return rf"\textbf{{{text}}}"
+    if second:
+        return rf"\underline{{{text}}}"
+    return text
+
+
+def _build_markdown(aggregated) -> str:
+    output = [
+        "# Newly-Added-Sensor Forecast Errors",
+        "",
+        "Mean ± std over five seeds on sensors whose stable metadata IDs were "
+        "absent from the preceding year. Years without a newly added ID are "
+        "excluded. **Bold** = best; _underline_ = second best.",
+        "",
+    ]
+    labels = [label for _group, label, _slug in COLUMNS]
+    header = "| Metric | Horizon | " + " | ".join(labels) + " |"
+    align = "|:------:|:-------:|" + "|".join([":-:"] * len(labels)) + "|"
+    for dataset in DATASETS:
+        output.extend((f"## {dataset}", "", header, align))
+        for metric in METRICS:
+            for index, horizon in enumerate(HORIZONS):
+                row = [
+                    aggregated[(dataset, slug, horizon, metric)]
+                    for _group, _label, slug in COLUMNS
+                ]
+                best, second = _rank(row)
+                cells = [
+                    _fmt_md(value, col in best, col in second)
+                    for col, value in enumerate(row)
+                ]
+                metric_label = "MAPE (%)" if metric == "MAPE" else metric
+                metric_cell = f"**{metric_label}**" if index == 0 else ""
+                output.append(
+                    f"| {metric_cell} | {horizon} | " + " | ".join(cells) + " |"
+                )
+        output.append("")
+    return "\n".join(output)
+
+
+def _group_spans():
+    spans = []
+    for group, _label, _slug in COLUMNS:
+        if spans and spans[-1][0] == group:
+            spans[-1] = (group, spans[-1][1] + 1)
         else:
-            group_spans.append((grp, 1))
-            last = grp
-    n_cols = len(COLUMNS)
-    # 3 leading meta cols (Dataset|Metric|Horizon) + n_cols method cols
-    col_spec = "ccc|" + "|".join(["c" * w for _g, w in group_spans])
+            spans.append((group, 1))
+    return spans
 
-    out = []
-    out.append(r"\begin{table*}[t]")
-    out.append(r"\centering")
-    out.append(r"\caption{" + caption + r"}")
-    out.append(r"\label{" + label + r"}")
-    out.append(r"\resizebox{\textwidth}{!}{%")
-    out.append(r"\begin{tabular}{" + col_spec + r"}")
-    out.append(r"\toprule")
 
-    # Header row 1: group spans
-    h1 = [
+def _build_latex(datasets, aggregated, part: int) -> str:
+    spans = _group_spans()
+    column_spec = "ccc|" + "|".join("c" * width for _group, width in spans)
+    output = [
+        r"\begin{table*}[t]",
+        r"\centering",
+        rf"\caption{{Newly-added-sensor errors (part {part}/2).}}",
+        rf"\label{{tab:tsas_new_sensors_part{part}}}",
+        r"\resizebox{\textwidth}{!}{%",
+        rf"\begin{{tabular}}{{{column_spec}}}",
+        r"\toprule",
+    ]
+    group_header = [
         r"\multirow{2}{*}{\textbf{Dataset}}",
         r"\multirow{2}{*}{\textbf{Metric}}",
         r"\multirow{2}{*}{\textbf{Horizon}}",
     ]
-    for grp, w in group_spans:
-        h1.append(r"\multicolumn{" + str(w) + r"}{c"
-                  + ("|" if grp != group_spans[-1][0] else "")
-                  + r"}{\textbf{" + grp + r"}}")
-    out.append(" & ".join(h1) + r" \\")
+    for group, width in spans:
+        group_header.append(
+            rf"\multicolumn{{{width}}}{{c}}{{\textbf{{{group}}}}}"
+        )
+    output.append(" & ".join(group_header) + r" \\")
 
-    # cmidrules per group
-    cmid = []
-    col_cursor = 4  # first method col index (1-based) = 4
-    for grp, w in group_spans:
-        cmid.append(r"\cmidrule(lr){" + f"{col_cursor}-{col_cursor + w - 1}" + r"}")
-        col_cursor += w
-    out.append(" ".join(cmid))
+    start = 4
+    rules = []
+    for _group, width in spans:
+        rules.append(rf"\cmidrule(lr){{{start}-{start + width - 1}}}")
+        start += width
+    output.append(" ".join(rules))
+    output.append(
+        " & ".join(["", "", ""] + [
+            rf"\textbf{{{label}}}" for _group, label, _slug in COLUMNS
+        ]) + r" \\"
+    )
+    output.append(r"\midrule")
 
-    # Header row 2: column labels under the group spans
-    h2 = ["", "", ""]
-    for _grp, lbl, _slug in COLUMNS:
-        h2.append(r"\textbf{" + lbl + r"}")
-    out.append(" & ".join(h2) + r" \\")
-    out.append(r"\midrule")
-
-    n_rows_per_ds = len(METRICS) * len(HORIZONS)
-    emitted = [d for d in datasets if d in present_ds]
-    for di, ds in enumerate(emitted):
-        for mi, met in enumerate(METRICS):
-            for hi, h in enumerate(HORIZONS):
-                # Compute (mean, std) for every column
-                vals = []
-                for _grp, _lbl, slug in COLUMNS:
-                    raw = rows_by_key.get((ds, slug, h, met))
-                    vals.append(_agg(raw))
-                best_set, second_set = _rank(vals)
-
-                cells = [_fmt_tex(m, s, i in best_set, i in second_set)
-                         for i, (m, s) in enumerate(vals)]
-
-                ds_cell = ""
-                if mi == 0 and hi == 0:
-                    ds_cell = r"\multirow{" + str(n_rows_per_ds) + r"}{*}{\textbf{" + ds + r"}}"
-                met_cell = ""
-                if hi == 0:
-                    met_label = r"MAPE (\%)" if met == "MAPE" else met
-                    met_cell = r"\multirow{" + str(len(HORIZONS)) + r"}{*}{" + met_label + r"}"
-
-                out.append(" & ".join([ds_cell, met_cell, h] + cells) + r" \\")
-            # cmidrule between metrics within a dataset
-            if mi < len(METRICS) - 1:
-                out.append(r"\cmidrule(lr){2-" + str(3 + n_cols) + r"}")
-        if di < len(emitted) - 1:
-            out.append(r"\midrule")
-
-    out.append(r"\bottomrule")
-    out.append(r"\end{tabular}%")
-    out.append(r"}")
-    out.append(r"\end{table*}")
-    return "\n".join(out) + "\n"
-
-
-# ---------------------------------------------------------------------------
-# Markdown
-# ---------------------------------------------------------------------------
-def _fmt_md(mean, std, is_best, is_second):
-    if mean is None:
-        return "—"
-    s = f"{mean:.2f} ± {std:.2f}"
-    if is_best:
-        return f"**{s}**"
-    if is_second:
-        return f"_{s}_"
-    return s
-
-
-def build_md(datasets):
-    out = []
-    out.append("# Newly-Added-Sensor Forecast Errors")
-    out.append("")
-    out.append("Mean ± std over seeds, computed on **newly added sensors only** "
-               "(years where the graph did not grow are excluded). "
-               "**Bold** = best per row, _underline_ = second best.")
-    out.append("")
-    out.append("Column groups and order follow `tables/main_table_full.tex`:")
-    out.append("- **Static STGNN Backbones**: DCRNN, ASTGNN, TGCN, GWN")
-    out.append("- **Naive Schemes**: Pretrain, Retrain, OL-NN, OL-AN")
-    out.append("- **Evolving-Graph Continual**: TrafStm, PECPM, STKEC, EAC")
-    out.append("- **Retrieval / TTC**: STRAP, ST-TTC")
-    out.append("- **Other Static Backbones**: STID, STNorm, iTrans, DLinear")
-    out.append("- **Ours**: A2TTA")
-    out.append("")
-    labels = [lbl for _g, lbl, _s in COLUMNS]
-    header = "| Metric | Horizon | " + " | ".join(labels) + " |"
-    align = "|:------:|:-------:|" + "|".join([":-:"] * len(labels)) + "|"
-
-    for ds in datasets:
-        if ds not in present_ds:
-            continue
-        out.append(f"## {ds}")
-        out.append("")
-        out.append(header)
-        out.append(align)
-        for met in METRICS:
-            for hi, h in enumerate(HORIZONS):
-                vals = []
-                for _g, _lbl, slug in COLUMNS:
-                    raw = rows_by_key.get((ds, slug, h, met))
-                    vals.append(_agg(raw))
-                best_set, second_set = _rank(vals)
-                cells = [_fmt_md(m, s, i in best_set, i in second_set)
-                         for i, (m, s) in enumerate(vals)]
-                met_lbl = "**MAPE (%)**" if met == "MAPE" else f"**{met}**"
-                met_cell = met_lbl if hi == 0 else ""
-                out.append(f"| {met_cell} | {h} | " + " | ".join(cells) + " |")
-        out.append("")
-    return "\n".join(out) + "\n"
-
-
-# ---------------------------------------------------------------------------
-# Coverage report
-# ---------------------------------------------------------------------------
-def coverage_report():
-    print("=== Coverage (seeds per (dataset, method) for new-sensor eval) ===")
-    for ds in DATASET_PART1 + DATASET_PART2:
-        if ds not in present_ds:
-            print(f"  {ds:<7}  [NOT PRESENT]")
-            continue
-        line = []
-        for _g, lbl, slug in COLUMNS:
-            seeds = sorted(seen_seeds.get((ds, slug, "Avg"), []))
-            mark = f"{len(seeds)}" if seeds else "·"
-            line.append(f"{lbl}={mark}")
-        print(f"  {ds:<7}  " + "  ".join(line))
-
-
-# ---------------------------------------------------------------------------
-# Write files
-# ---------------------------------------------------------------------------
-os.makedirs(TABLES_DIR, exist_ok=True)
-
-caption_base = (r"Newly-added-sensor forecast errors, part {pi}/2 "
-                r"({ds_list}; mean$\pm$std over seeds per dataset). "
-                r"Years where the graph did not grow are excluded. "
-                r"Baselines are grouped and ordered to match "
-                r"\Cref{{tab:main_full}}. \textbf{{Bold}}: best, "
-                r"\underline{{underline}}: second best.")
-
-tex1_path = osp.join(TABLES_DIR, "tsas_new_sensors_part1.tex")
-tex2_path = osp.join(TABLES_DIR, "tsas_new_sensors_part2.tex")
-md_path = osp.join(TABLES_DIR, "tsas_new_sensors.md")
-
-with open(tex1_path, "w") as f:
-    f.write(build_tex(
-        DATASET_PART1,
-        caption=caption_base.format(pi=1, ds_list=", ".join(DATASET_PART1)),
-        label="tab:tsas_new_sensors_part1",
+    rows_per_dataset = len(METRICS) * len(HORIZONS)
+    for dataset_index, dataset in enumerate(datasets):
+        for metric_index, metric in enumerate(METRICS):
+            for horizon_index, horizon in enumerate(HORIZONS):
+                row = [
+                    aggregated[(dataset, slug, horizon, metric)]
+                    for _group, _label, slug in COLUMNS
+                ]
+                best, second = _rank(row)
+                cells = [
+                    _fmt_tex(value, col in best, col in second)
+                    for col, value in enumerate(row)
+                ]
+                dataset_cell = (
+                    rf"\multirow{{{rows_per_dataset}}}{{*}}{{\textbf{{{dataset}}}}}"
+                    if metric_index == 0 and horizon_index == 0 else ""
+                )
+                metric_label = r"MAPE (\%)" if metric == "MAPE" else metric
+                metric_cell = (
+                    rf"\multirow{{{len(HORIZONS)}}}{{*}}{{{metric_label}}}"
+                    if horizon_index == 0 else ""
+                )
+                output.append(
+                    " & ".join(
+                        [dataset_cell, metric_cell, horizon] + cells
+                    ) + r" \\"
+                )
+            if metric_index < len(METRICS) - 1:
+                output.append(rf"\cmidrule(lr){{2-{3 + len(COLUMNS)}}}")
+        if dataset_index < len(datasets) - 1:
+            output.append(r"\midrule")
+    output.extend((
+        r"\bottomrule",
+        r"\end{tabular}%",
+        r"}",
+        r"\end{table*}",
+        "",
     ))
-print(f"[ok] wrote {tex1_path}")
+    return "\n".join(output)
 
-with open(tex2_path, "w") as f:
-    f.write(build_tex(
-        DATASET_PART2,
-        caption=caption_base.format(pi=2, ds_list=", ".join(DATASET_PART2)),
-        label="tab:tsas_new_sensors_part2",
-    ))
-print(f"[ok] wrote {tex2_path}")
 
-with open(md_path, "w") as f:
-    f.write(build_md(DATASET_PART1 + DATASET_PART2))
-print(f"[ok] wrote {md_path}")
+def _parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--baseline-run", type=Path, required=True,
+        help="run root containing datasets/<dataset>/summary.csv",
+    )
+    parser.add_argument(
+        "--stae-run", type=Path, required=True,
+        help="frozen-STAEFormer run root in the same summary format",
+    )
+    parser.add_argument(
+        "--a2tta-run", type=Path, action="append", required=True,
+        help="A2TTA run root containing detail/*.csv; repeat for backfill roots",
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, default=REPO_ROOT / "tables",
+    )
+    parser.add_argument("--expected-seeds", type=int, default=5)
+    return parser.parse_args()
 
-print()
-coverage_report()
+
+def main() -> None:
+    args = _parse_args()
+    values = {}
+    values.update(_read_summary_layer(args.baseline_run.resolve(), BASELINE_METHODS))
+    values.update(_read_summary_layer(args.stae_run.resolve(), {PLAIN_STAE_METHOD}))
+    values.update(_read_a2tta_layer([path.resolve() for path in args.a2tta_run]))
+    _validate_coverage(values, args.expected_seeds)
+    aggregated = _aggregate(values)
+
+    output_dir = args.output_dir.resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs = {
+        output_dir / "tsas_new_sensors.md": _build_markdown(aggregated),
+        output_dir / "tsas_new_sensors_part1.tex": _build_latex(
+            DATASET_PART1, aggregated, 1
+        ),
+        output_dir / "tsas_new_sensors_part2.tex": _build_latex(
+            DATASET_PART2, aggregated, 2
+        ),
+    }
+    for path, content in outputs.items():
+        path.write_text(content, encoding="utf-8")
+        print(f"[write] {path}")
+
+
+if __name__ == "__main__":
+    main()

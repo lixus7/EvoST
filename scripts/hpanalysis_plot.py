@@ -9,16 +9,18 @@ We normalise each (dataset,backbone)'s Avg-MAE by its own anchor -> %DeltaMAE,
 then average over the 3 datasets. Figure = 6 subplots, one line per backbone.
 
 Usage: python scripts/hpanalysis_plot.py [ROOT]   (default: latest hpAna_* root)
-Outputs (../tables/): hp_sensitivity.pdf/.png , hp_sensitivity.md
+Outputs (tables/): hp_sensitivity.pdf/.png , hp_sensitivity.md
 """
 import csv, glob, os, sys, statistics as st
 from collections import defaultdict
 
-HERE = os.path.dirname(os.path.abspath(__file__)); os.chdir(os.path.dirname(HERE))
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(HERE)
+os.chdir(REPO_ROOT)
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else sorted(glob.glob("run_logs/hpAna_*"))[-1]
 CSVDIR = os.path.join(ROOT, "csv")
-OUT = "../tables"
+OUT = os.path.join(REPO_ROOT, "tables")
 
 # knob -> (pretty label, ordered values incl anchor, anchor value, xscale)
 HP_SPEC = [

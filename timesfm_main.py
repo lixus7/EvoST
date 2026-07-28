@@ -13,10 +13,9 @@ Key correctness points
    FastData/{year}.npz test split. TimesFM, being a foundation model, normalizes
    each input series internally, so it needs *raw-scale* context (not the z-scored
    test_x). We therefore reconstruct the raw context windows from RawData/{year}.npz
-   using the identical generate_dataset() indexing, and we VERIFY that z_score(raw_x)
-   reproduces the cached test_x bit-for-bit before trusting the alignment. The
-   ground-truth targets are taken straight from the cached FastData test_y, so the
-   evaluation is identical to the other baselines.
+   using identical generate_dataset() indexing, and verify their shapes and raw
+   targets against the cache before trusting the alignment. The ground-truth
+   targets are taken straight from the cached FastData test_y.
 
 2. Raw context in, raw predictions out. cal_metric() masks out null_val=0 targets,
    matching the rest of the benchmark.

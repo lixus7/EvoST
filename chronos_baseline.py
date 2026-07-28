@@ -16,8 +16,9 @@ Key fidelity points (verified against the precomputed FastData npz):
     the PEMS-style 31*288 day slice. We rebuild the *raw-scale* test windows the
     same way (slice -> test_idx = [0.8t, t) -> generate_dataset), so we can feed
     Chronos the unnormalised context it expects and compare against the raw
-    targets. We assert our reconstruction matches the npz test_x (after z-score)
-    and test_y (raw) before trusting it.
+    targets. We assert that the reconstructed window shapes and raw test_y match
+    the cache. New caches also store their training-only input statistics, which
+    lets us verify test_x without estimating statistics from the future split.
   * Metrics are the *cumulative-horizon* MAE/RMSE/MAPE at T=3,6,12 and the Avg
     over T=1..12, masked at null_val=0 — identical to utils/metric.cal_metric.
 
@@ -113,10 +114,10 @@ def cal_metric(ground_truth, prediction):
 # --------------------------------------------------------------------------- #
 # Data: rebuild the exact raw-scale test windows used by generate_samples.
 # --------------------------------------------------------------------------- #
-def z_score(data):
+def z_score(data, mean=None, std=None):
     """Copy of utils/data_convert.z_score (for the reconstruction sanity check)."""
-    mean = np.nanmean(data)
-    std = np.nanstd(data)
+    mean = np.nanmean(data) if mean is None else float(mean)
+    std = np.nanstd(data) if std is None else float(std)
     if not np.isfinite(std) or std < 1e-8:
         std = 1.0
     out = (data - mean) / std
@@ -145,8 +146,9 @@ def build_test_windows(raw_data_path, year, fast_data_path=None, verify=True):
 
     test_x: (S, X_LEN, N) raw-scale context (fed to Chronos)
     test_y: (S, Y_LEN, N) raw-scale targets (ground truth)
-    If verify and the FastData npz exists, assert z_score(test_x)==npz.test_x and
-    test_y==npz.test_y so we know the windowing matches the trained baselines.
+    If a FastData cache exists, assert shape and raw-target alignment. New caches
+    also expose ``input_mean``/``input_std`` so their training-stat-normalised
+    ``test_x`` can be checked directly. Legacy caches remain target-verifiable.
     """
     raw = np.load(os.path.join(raw_data_path, f"{year}.npz"))["x"]
     # PEMS (5-min) keeps the 31-day slice (DAYS*288). TFNSW is hourly and a whole
@@ -165,8 +167,12 @@ def build_test_windows(raw_data_path, year, fast_data_path=None, verify=True):
             ref = np.load(fp, allow_pickle=True)
             assert test_x.shape == ref["test_x"].shape, (
                 f"shape mismatch {test_x.shape} vs {ref['test_x'].shape}")
-            assert np.allclose(z_score(test_x), ref["test_x"], atol=1e-3), \
-                "reconstructed test_x (z-scored) does not match FastData npz"
+            if {"input_mean", "input_std"}.issubset(ref.files):
+                normalized_x = z_score(
+                    test_x, ref["input_mean"], ref["input_std"]
+                )
+                assert np.allclose(normalized_x, ref["test_x"], atol=1e-3), \
+                    "training-stat-normalized test_x does not match FastData npz"
             assert np.allclose(test_y, ref["test_y"], atol=1e-3), \
                 "reconstructed test_y does not match FastData npz"
     return test_x, test_y
@@ -329,12 +335,20 @@ def forecast_multivariate(pipeline, test_x, groups, batch_size):
 # --------------------------------------------------------------------------- #
 def resolve_paths(dataset):
     ds = dataset.lower()
-    # TFNSW lives at the repo root (../tfnsw), not under xxltrafficdata/preprocessed/.
-    base = "../tfnsw" if ds == "tfnsw" else f"../xxltrafficdata/preprocessed/{ds}"
+    repo_root = os.path.dirname(os.path.abspath(__file__))
+    if ds == "tfnsw":
+        base = os.environ.get(
+            "A2TTA_TFNSW_ROOT", os.path.join(repo_root, "data", "tfnsw")
+        )
+    else:
+        data_root = os.environ.get(
+            "A2TTA_DATA_ROOT", os.path.join(repo_root, "data")
+        )
+        base = os.path.join(data_root, ds)
     return {
-        "raw": f"{base}/RawData/",
-        "fast": f"{base}/FastData/",
-        "graph": f"{base}/graph/",
+        "raw": os.path.join(base, "RawData"),
+        "fast": os.path.join(base, "FastData"),
+        "graph": os.path.join(base, "graph"),
     }
 
 

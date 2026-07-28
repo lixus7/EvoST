@@ -1,5 +1,5 @@
 """
-Read the A2TTA-Lite CSV and print a compact comparison table per dataset.
+Read the A2TTA CSV and print a compact comparison table per dataset.
 
 Usage:
   python scripts/a2tta_summarize.py run_logs/a2tta_lite_pems05_results.csv
@@ -13,7 +13,7 @@ years, then mean±std across seeds. Output mirrors the table in the prompt:
   calibrator      ...
   ...
 
-A2TTA-Lite Avg MAE row is highlighted with a >> marker if it beats the
+A2TTA Avg MAE row is highlighted with a >> marker if it beats the
 configured Online-AN reference (default 11.10 on PEMS05).
 """
 from __future__ import annotations
@@ -98,6 +98,6 @@ if __name__ == "__main__":
     p.add_argument("csv", type=str)
     p.add_argument("--dataset", type=str, default="PEMS05")
     p.add_argument("--ref_avg_mae", type=float, default=11.10,
-                   help="Reference (Online-AN Avg MAE) to compare A2TTA-Lite against.")
+                   help="Reference (Online-AN Avg MAE) to compare A2TTA against.")
     args = p.parse_args()
     summarize(args.csv, args.dataset, args.ref_avg_mae)

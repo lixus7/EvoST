@@ -26,7 +26,19 @@ PY_VER=${PY_VER:-3.11}          # timesfm[torch] extra is gated to python 3.11
 REPO_ROOT=${REPO_ROOT:-.}
 # Persistent HF cache shared by setup (online) and the HPC job (offline).
 export HF_HOME=${HF_HOME:-./hf_cache}
-CONDA_SH=${CONDA_SH:-$CONDA
+if [[ -z "${CONDA_SH:-}" ]]; then
+    if command -v conda >/dev/null 2>&1; then
+        CONDA_BASE=$(conda info --base)
+        CONDA_SH="$CONDA_BASE/etc/profile.d/conda.sh"
+    else
+        echo "[setup] ERROR: conda not found; set CONDA_SH to conda.sh" >&2
+        exit 1
+    fi
+fi
+[[ -f "$CONDA_SH" ]] || {
+    echo "[setup] ERROR: conda initialization script not found: $CONDA_SH" >&2
+    exit 1
+}
 # IMPORTANT: PyPI `timesfm` (<=1.3.0) only ships the CLASSIC API (TimesFm /
 # TimesFmHparams) and CANNOT load the 2.5 checkpoint. The TimesFM 2.5 API
 # (TimesFM_2p5_200M_torch / ForecastConfig / from_pretrained) lives only on

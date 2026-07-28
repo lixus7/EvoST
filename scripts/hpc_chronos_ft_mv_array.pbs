@@ -19,6 +19,10 @@ resolve_repo() {
 }
 
 REPO=$(resolve_repo)
+PEMS_DATA_ROOT=${A2TTA_DATA_ROOT:-"$REPO/data"}
+TFNSW_DATA_ROOT=${A2TTA_TFNSW_ROOT:-"$REPO/data/tfnsw"}
+export A2TTA_DATA_ROOT="$PEMS_DATA_ROOT"
+export A2TTA_TFNSW_ROOT="$TFNSW_DATA_ROOT"
 PYTHON=${A2TTA_PYTHON:-}
 if [[ -z "$PYTHON" ]]; then
     PYTHON=$(command -v python3 || command -v python || true)
@@ -47,9 +51,9 @@ fi
 declare -a TASKS=()
 for dataset in "${DATASETS[@]}"; do
     if [[ "$dataset" == tfnsw ]]; then
-        raw_dir="$REPO/../tfnsw/RawData"
+        raw_dir="$TFNSW_DATA_ROOT/RawData"
     else
-        raw_dir="$REPO/../xxltrafficdata/preprocessed/$dataset/RawData"
+        raw_dir="$PEMS_DATA_ROOT/$dataset/RawData"
     fi
     while IFS= read -r raw_file; do
         year=$(basename "$raw_file" .npz)
@@ -135,8 +139,6 @@ fi
 
 mkdir -p "$WORK_DIR" "$OUT_DIR/$DATASET"
 cp "$REPO/chronos_finetune.py" "$REPO/chronos_baseline.py" "$WORK_DIR/"
-ln -s "$REPO/../xxltrafficdata" "$LOCAL_ROOT/xxltrafficdata"
-ln -s "$REPO/../tfnsw" "$LOCAL_ROOT/tfnsw"
 
 export PYTHONNOUSERSITE=1
 export PYTHONUNBUFFERED=1

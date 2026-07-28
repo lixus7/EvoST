@@ -32,10 +32,9 @@ It is fully self-contained — it does **not** modify `main.py`, `stkec_main.py`
 
 * **Same test set.** Every other baseline loads the cached `FastData/{year}.npz`
   test split (built with the 31-day slice → 1762 windows). TimesFM reconstructs
-  the **raw-scale** context windows from `RawData/{year}.npz` using the identical
-  `generate_dataset` indexing, and **verifies** the reconstruction matches the
-  cached `test_y` before evaluating. (Verified bit-for-bit: `z_score(raw_x)` ==
-  cached `test_x`, `raw_y` == cached `test_y`.)
+  the **raw-scale** context windows from `RawData/{year}.npz` using identical
+  `generate_dataset` indexing, and verifies window shapes and raw targets
+  against the cached `test_y` before evaluating.
 * **Raw scale in, raw scale out.** TimesFM normalizes each series internally, so
   it is fed raw context (not the z-scored `test_x`) and produces raw predictions.
 * **Same metrics.** Uses the shared `utils.metric.cal_metric` → MAE / RMSE / MAPE

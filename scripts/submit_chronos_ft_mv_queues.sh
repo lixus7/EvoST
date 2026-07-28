@@ -9,6 +9,8 @@ set -Eeuo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO=${A2TTA_REPO:-$(cd -- "$SCRIPT_DIR/.." && pwd)}
+PEMS_DATA_ROOT=${A2TTA_DATA_ROOT:-"$REPO/data"}
+TFNSW_DATA_ROOT=${A2TTA_TFNSW_ROOT:-"$REPO/data/tfnsw"}
 WORKER=${A2TTA_WORKER:-"$REPO/scripts/hpc_chronos_ft_mv_array.pbs"}
 LOG_DIR=${A2TTA_LOG_DIR:-"$REPO/run_logs/chronos_ft_mv_pbs"}
 
@@ -59,9 +61,9 @@ else
     shopt -s nullglob
     for dataset in "${DATASETS[@]}"; do
         if [[ "$dataset" == tfnsw ]]; then
-            raw_dir="$REPO/../tfnsw/RawData"
+            raw_dir="$TFNSW_DATA_ROOT/RawData"
         else
-            raw_dir="$REPO/../xxltrafficdata/preprocessed/$dataset/RawData"
+            raw_dir="$PEMS_DATA_ROOT/$dataset/RawData"
         fi
         raw_files=("$raw_dir"/*.npz)
         TOTAL_TASKS=$((TOTAL_TASKS + ${#raw_files[@]} * 3))
@@ -101,7 +103,7 @@ if [[ ${DRY_RUN:-0} == 1 ]]; then
     exit 0
 fi
 
-worker_vars="TOTAL_LANES=$TOTAL_LANES,A2TTA_REPO=$REPO"
+worker_vars="TOTAL_LANES=$TOTAL_LANES,A2TTA_REPO=$REPO,A2TTA_DATA_ROOT=$PEMS_DATA_ROOT,A2TTA_TFNSW_ROOT=$TFNSW_DATA_ROOT"
 if [[ -n "${A2TTA_PYTHON:-}" ]]; then
     worker_vars+=",A2TTA_PYTHON=$A2TTA_PYTHON"
 fi

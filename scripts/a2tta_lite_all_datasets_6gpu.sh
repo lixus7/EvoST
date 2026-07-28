@@ -1,12 +1,11 @@
 #!/bin/bash
 # ===========================================================================
-# A2TTA-Lite on all remaining PEMS datasets, 6-GPU parallel.
+# A2TTA on all PEMS datasets, multi-GPU.
 # ---------------------------------------------------------------------------
 # Default GPU pool: 2 3 4 5 6 7  (skips GPU 0 and GPU 1)
 # Default datasets: PEMS03 PEMS04 PEMS06 PEMS07 PEMS08 PEMS10 PEMS11 PEMS12
 #   (PEMS05 already done — its CSV remains untouched.)
-# Methods (same matrix as PEMS05 run): backbone, calibrator, tta_random,
-#   tta_recent, tta_error, a2tta_lite.
+# Methods: backbone, calibrator, tta_all, and full A2TTA (tta_ctx_local).
 # ---------------------------------------------------------------------------
 # Output:
 #   run_logs/multi_a2tta_<ts>/csv/<DATASET>__<METHOD>__s<SEED>.csv
@@ -21,7 +20,7 @@
 #
 # Tweak:
 #   GPUS="2 3 4 5"            DATASETS="PEMS03 PEMS04"   \
-#   SEEDS="51 52"             METHODS="a2tta_lite tta_random" \
+#   SEEDS="51 52"             METHODS="tta_ctx_local" \
 #   NOHUP=1 bash scripts/a2tta_lite_all_datasets_6gpu.sh
 #
 #   FAST_DEV_RUN=1            (1 year × 4 batches per job — sanity check)
@@ -40,15 +39,20 @@ GPUS=${GPUS:-"2 3 4 5 6 7"}
 # steps=3, budget=0.25, pool=512 — see scripts/a2tta_sweep_summarize.py).
 DATASETS=${DATASETS:-"PEMS03 PEMS04 PEMS05 PEMS06 PEMS07 PEMS08 PEMS10 PEMS11 PEMS12"}
 SEEDS=${SEEDS:-"51 52 53 54 55"}
-METHODS=${METHODS:-"backbone calibrator tta_random tta_recent tta_error a2tta_lite"}
+METHODS=${METHODS:-"backbone calibrator tta_all tta_ctx_local"}
 BACKBONE_LOGNAME=${BACKBONE_LOGNAME:-"oneline_st_an"}     # template; <DATASET-lower> appended
 BACKBONE_FALLBACK=${BACKBONE_FALLBACK:-"retrain_st"}      # template
 WARMUP_EPOCHS=${WARMUP_EPOCHS:-3}
-EVAL_BATCH=${EVAL_BATCH:-64}
-# --- tuned defaults (from sweep top-1 a2tta_lite config; see Δ −0.24 vs Online-AN) ---
+EVAL_BATCH=${EVAL_BATCH:-1}
+# Strict chronological protocol: one logical prediction window at a time while
+# retaining the original 64-window global adaptation cadence.
+ADAPT_EVERY_WINDOWS=${ADAPT_EVERY_WINDOWS:-64}
+LABEL_DELAY_STEPS=${LABEL_DELAY_STEPS:-12}
+SENSOR_METADATA_ROOT=${SENSOR_METADATA_ROOT:-data/sensor_metadata}
+# --- tuned defaults ---
 ADAPT_LR=${ADAPT_LR:-1e-3}
 ADAPT_STEPS=${ADAPT_STEPS:-3}
-ADAPT_EVERY=${ADAPT_EVERY:-1}
+ADAPT_EVERY_BATCHES=${ADAPT_EVERY_BATCHES:-1}
 BUDGET_FRAC=${BUDGET_FRAC:-0.25}
 POOL_SIZE=${POOL_SIZE:-512}
 LAMBDA_CONS=${LAMBDA_CONS:-0.05}
@@ -83,6 +87,7 @@ fi
 
 echo "[multi] root=$SWEEP_ROOT"
 echo "[multi] GPUs='$GPUS'  datasets='$DATASETS'  seeds='$SEEDS'  methods='$METHODS'"
+echo "[multi] eval_batch=$EVAL_BATCH cadence=$ADAPT_EVERY_WINDOWS label_delay=$LABEL_DELAY_STEPS"
 
 # ---------------------------------------------------------------------------
 # GPU semaphore (FIFO) — pool seeded from explicit GPU list (NOT 0..N-1)
@@ -118,14 +123,23 @@ run_job() {
     {
         local start_ts=$(date +%s)
         echo "[gpu=$gpu start $(date +%H:%M:%S)] $tag" >> "$SWEEP_ROOT/dispatcher.log"
-        python a2tta_main.py "$@" \
-            --gpuid "$gpu" \
-            --csv_path "$csv" \
-            --eval_batch_size "$EVAL_BATCH" \
-            --warmup_epochs "$WARMUP_EPOCHS" \
-            --fast_dev_run "$FAST_DEV_RUN" \
-            >> "$log" 2>&1
-        local rc=$?
+        local rc=0
+        if python a2tta_main.py "$@" \
+                --gpuid "$gpu" \
+                --csv_path "$csv" \
+                --eval_batch_size "$EVAL_BATCH" \
+                --adapt_every_windows "$ADAPT_EVERY_WINDOWS" \
+                --label_delay_steps "$LABEL_DELAY_STEPS" \
+                --input_normalization train \
+                --sensor_id_mode metadata \
+                --sensor_metadata_root "$SENSOR_METADATA_ROOT" \
+                --warmup_epochs "$WARMUP_EPOCHS" \
+                --fast_dev_run "$FAST_DEV_RUN" \
+                >> "$log" 2>&1; then
+            rc=0
+        else
+            rc=$?
+        fi
         local end_ts=$(date +%s)
         local elapsed=$((end_ts - start_ts))
         echo "[gpu=$gpu done  $(date +%H:%M:%S) rc=$rc t=${elapsed}s] $tag" >> "$SWEEP_ROOT/dispatcher.log"
@@ -143,7 +157,7 @@ run_job() {
 for DATASET in $DATASETS; do
     DD=${DATASET#PEMS}                 # e.g. PEMS03 → 03
     LOWER=$(echo "$DATASET" | tr 'A-Z' 'a-z')   # e.g. pems03
-    CONF="conf/${DATASET}/a2tta_lite_${LOWER}.json"
+    CONF="conf/${DATASET}/a2tta_olan_${LOWER}.json"
     BB_LOG="${BACKBONE_LOGNAME}_${LOWER}"        # e.g. oneline_st_an_pems03
     BB_FB="${BACKBONE_FALLBACK}_${LOWER}"        # e.g. retrain_st_pems03
 
@@ -169,7 +183,7 @@ for DATASET in $DATASETS; do
                 --node_emb_dim "$NODE_EMB_DIM" \
                 --adapt_lr "$ADAPT_LR" \
                 --adapt_steps "$ADAPT_STEPS" \
-                --adapt_every_batches "$ADAPT_EVERY" \
+                --adapt_every_batches "$ADAPT_EVERY_BATCHES" \
                 --budget_frac "$BUDGET_FRAC" \
                 --candidate_pool_size "$POOL_SIZE" \
                 --lambda_cons "$LAMBDA_CONS" \
@@ -213,7 +227,7 @@ if [[ -f "$RESULTS" ]]; then
     done
 fi
 
-echo "==================== A2TTA-Lite MULTI-DATASET DONE ===================="
+echo "==================== A2TTA MULTI-DATASET DONE ===================="
 echo "Sweep root  : $SWEEP_ROOT"
 echo "Results CSV : $RESULTS"
 echo "Per-job logs: $SWEEP_ROOT/logs/"

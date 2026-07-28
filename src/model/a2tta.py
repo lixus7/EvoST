@@ -1,5 +1,5 @@
 """
-A2TTA-Lite: Active Adaptive Test-Time Adaptation for Traffic Forecasting.
+A2TTA: Anchored-and-Agile Test-Time Adaptation for Traffic Forecasting.
 
 Components in this file:
   * `ResidualCalibrator` — small per-node calibrator that emits a zero-init

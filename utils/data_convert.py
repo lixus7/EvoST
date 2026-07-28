@@ -1,8 +1,10 @@
-import tqdm
+import re
+
 import numpy as np
+import tqdm
 
 
-def z_score(data):
+def z_score(data, mean=None, std=None):
     """
     Calculate the standardized value of the data, that is, subtract the mean from the data 
     and divide it by the standard deviation to ensure that the data follows a standard normal distribution in a statistical sense.
@@ -11,9 +13,13 @@ def z_score(data):
     entries in the raw sensor data. Using np.mean / np.std on such arrays poisons the
     whole split with NaN. We fall back to nanmean / nanstd, guard against zero std, and
     impute remaining NaNs with 0 (i.e. sensor-global mean in z-score space).
+
+    ``mean`` and ``std`` may be supplied to reuse training-split statistics for
+    validation/test data.  This is the leakage-free default in
+    :func:`generate_samples`.
     """
-    mean = np.nanmean(data)
-    std = np.nanstd(data)
+    mean = np.nanmean(data) if mean is None else float(mean)
+    std = np.nanstd(data) if std is None else float(std)
     if not np.isfinite(std) or std < 1e-8:
         std = 1.0
     out = (data - mean) / std
@@ -43,6 +49,16 @@ def generate_dataset(data, idx, x_len=12, y_len=12):
     
     return x, y
 
+
+def _is_pems_path(path):
+    """Whether a path contains a dataset component such as ``pems05``."""
+    parts = re.split(r"[\\/]+", str(path))
+    return any(
+        re.fullmatch(r"pems\d+", part, flags=re.IGNORECASE)
+        for part in parts
+    )
+
+
 def generate_samples(days, savepath, data, graph, train_rate=0.6, val_rate=0.2, test_rate=0.2, val_test_mix=False):
     """
     Generate training, validation and test datasets and save them as .npz files
@@ -50,14 +66,16 @@ def generate_samples(days, savepath, data, graph, train_rate=0.6, val_rate=0.2, 
     edge_index = np.array(list(graph.edges)).T  # Get the edge index of the graph and transpose it
     del graph
     
-    if savepath.split('/')[1] =='PEMS':
-        data = data[0:days*288, :]  # Extract data based on days
+    if _is_pems_path(savepath):
+        # The published PEMS benchmark uses the first ``days`` days of each
+        # yearly matrix at five-minute resolution. Detect the dataset by path
+        # component so relative and absolute download paths behave identically.
+        data = data[0:days*288, :]
     
     t, n = data.shape[0], data.shape[1]  # Get the time step and number of nodes of the data
     
     # Split the training, validation, and test set indices according to the ratio
-    # train_idx = [i for i in range(int(t*train_rate))]
-    train_idx = [i for i in range(int(t*0.2))] # for few-shot setting
+    train_idx = [i for i in range(int(t*train_rate))]
     val_idx = [i for i in range(int(t*train_rate), int(t*(train_rate+val_rate)))]
     test_idx = [i for i in range(int(t*(train_rate+val_rate)), t)]
     
@@ -74,15 +92,16 @@ def generate_samples(days, savepath, data, graph, train_rate=0.6, val_rate=0.2, 
         val_x, val_y = val_test_x[val_test_idx[:int(t*val_rate)]], val_test_y[val_test_idx[:int(t*val_rate)]]  # Re-partition validation and test set data
         test_x, test_y = val_test_x[val_test_idx[int(t*val_rate):]], val_test_y[val_test_idx[int(t*val_rate):]]
 
-    # Normalize the data to z-scores
-    """
-    Important Note:
-    It would be more reasonable to use only the mean and standard deviation of the training data to normalize the validation and test sets.
-    However, for consistency reasons, we follow TrafficStream's approach, which is currently acceptable.
-    """
-    train_x = z_score(train_x)
-    val_x = z_score(val_x)
-    test_x = z_score(test_x)
+    # Fit normalization on the training split only.  Re-estimating statistics
+    # independently on validation/test exposes aggregate information from the
+    # full future split.
+    train_mean = np.nanmean(train_x)
+    train_std = np.nanstd(train_x)
+    if not np.isfinite(train_std) or train_std < 1e-8:
+        train_std = 1.0
+    train_x = z_score(train_x, train_mean, train_std)
+    val_x = z_score(val_x, train_mean, train_std)
+    test_x = z_score(test_x, train_mean, train_std)
 
     # Targets (y) are kept in the raw scale. If the raw sensor series contains NaN
     # (happens in xxltrafficdata for years with missing detectors), MSE loss on NaN
@@ -94,9 +113,29 @@ def generate_samples(days, savepath, data, graph, train_rate=0.6, val_rate=0.2, 
     test_y = np.nan_to_num(test_y, nan=0.0, posinf=0.0, neginf=0.0)
 
     # Save data to file
-    np.savez(savepath, train_x=train_x, train_y=train_y, val_x=val_x, val_y=val_y, test_x=test_x, test_y=test_y, edge_index=edge_index)
+    np.savez(
+        savepath,
+        train_x=train_x,
+        train_y=train_y,
+        val_x=val_x,
+        val_y=val_y,
+        test_x=test_x,
+        test_y=test_y,
+        edge_index=edge_index,
+        input_mean=np.asarray(train_mean, dtype=np.float64),
+        input_std=np.asarray(train_std, dtype=np.float64),
+    )
     
     # Build the returned data dictionary
-    data = {"train_x":train_x, "train_y":train_y, "val_x":val_x, "val_y":val_y, "test_x":test_x, "test_y":test_y, "edge_index":edge_index}
+    data = {
+        "train_x": train_x,
+        "train_y": train_y,
+        "val_x": val_x,
+        "val_y": val_y,
+        "test_x": test_x,
+        "test_y": test_y,
+        "edge_index": edge_index,
+        "input_mean": np.asarray(train_mean, dtype=np.float64),
+        "input_std": np.asarray(train_std, dtype=np.float64),
+    }
     return data
-

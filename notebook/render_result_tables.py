@@ -73,7 +73,10 @@ def render(md_path):
             nrow = len(rows) + 1
             fs = max(4.0, CELL_FS_BASE * min(1.0, 30.0 / max(ncol, 1)))
             # landscape, width scales with columns
-            fig_w = max(8.0, 0.42 * ncol)
+            # Result cells contain "mean ± std", so narrow equal-width columns
+            # overlap even when the PDF is zoomed. A wider vector canvas keeps
+            # every value and long method header legible.
+            fig_w = max(8.0, 0.84 * ncol)
             fig_h = max(2.5, 0.30 * nrow + 0.6)
             fig, ax = plt.subplots(figsize=(fig_w, fig_h))
             ax.axis("off")

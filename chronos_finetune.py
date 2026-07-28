@@ -5,11 +5,11 @@ Chronos-2 FINE-TUNED (LoRA, per-year retrain) baseline for the evo-xxltraffic
 continual-forecasting benchmark — the trained counterpart of the zero-shot
 chronos_baseline.py.
 
-Protocol (matches the benchmark's "Retrain" strategy + the other trained
-baselines, so it is directly comparable to the main table):
+Protocol (the few-shot foundation-model reference used in the main table):
   for each (dataset, year):
-    1. take that year's TRAIN split (first 20% of the 31*288 timesteps — the
-       same contiguous data the trained ST baselines see).
+    1. take the first 20% of that year's 31*288-timestep slice. This is the
+       few-shot FT budget used by the other foundation-model references; the
+       conventional trained ST baselines use the benchmark's 60% train split.
     2. LoRA-fine-tune a fresh copy of amazon/chronos-2 on it (context_len=12,
        prediction_len=12, to match the eval task exactly).
     3. forecast that year's TEST windows with the fine-tuned model.
@@ -51,8 +51,8 @@ from chronos_baseline import (
 
 
 # --------------------------------------------------------------------------- #
-# Training data: the per-year TRAIN split (first 20% timesteps), raw scale,
-# imputed per series. Mirrors utils/data_convert.generate_samples' train_idx.
+# Training data: the per-year few-shot slice (first 20% of timesteps), raw
+# scale, imputed per series.
 # --------------------------------------------------------------------------- #
 def build_train_split(raw_data_path, year):
     raw = np.load(os.path.join(raw_data_path, f"{year}.npz"))["x"]
