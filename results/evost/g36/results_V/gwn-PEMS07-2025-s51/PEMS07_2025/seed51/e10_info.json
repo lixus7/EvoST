@@ -1,0 +1,155 @@
+{
+  "gwn_checkpoints": {
+    "2020": {
+      "file": "PEMS07_2020_s42.npz",
+      "best_epoch": 10,
+      "epochs_run": 17,
+      "lowest_validation_loss": 19.8386,
+      "test_T12_MAE": 18.05285731655787
+    },
+    "2025": {
+      "file": "PEMS07_2025_s42.npz",
+      "best_epoch": 9,
+      "epochs_run": 16,
+      "lowest_validation_loss": 17.8505,
+      "test_T12_MAE": 15.572657594155865
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 4888,
+  "sensors_old_year": 4881,
+  "known": 4809,
+  "unknown": 79,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.038261592846745685,
+  "geo_arms": true,
+  "old_bundle": "PEMS07_2020.npz",
+  "fit": {
+    "checkpoint_year": 2020,
+    "lr": 0.003,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 4,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "batch_windows": 1,
+    "holdout_mae": [
+      24.558798599814327,
+      16.491015917750286,
+      15.685538048516035,
+      15.696634298955287,
+      15.40850182138423,
+      15.350342717609204,
+      15.116835210210287,
+      15.326957991188241,
+      15.194298666807656,
+      15.243697928142144
+    ],
+    "best_epoch": 6,
+    "mean_abs_change": 0.20423753559589386,
+    "seconds": 93.65932059288025,
+    "selected_lr": 0.003,
+    "candidates": {
+      "0.001": {
+        "checkpoint_year": 2020,
+        "lr": 0.001,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 1,
+        "holdout_mae": [
+          24.558798599814327,
+          17.410154167452358,
+          16.528608679385112,
+          16.200967763343584,
+          15.887890316544226,
+          15.714475823826948,
+          15.605201414333175,
+          15.52187144930339,
+          15.452159778432511,
+          15.449678653789944,
+          15.419997405830399,
+          15.393430867007238,
+          15.508325648533605,
+          15.27575776275758,
+          15.274128274455931,
+          15.262439565912388,
+          15.32521630288402
+        ],
+        "best_epoch": 15,
+        "mean_abs_change": 0.20998099446296692,
+        "seconds": 43.91048812866211
+      },
+      "0.003": {
+        "checkpoint_year": 2020,
+        "lr": 0.003,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 1,
+        "holdout_mae": [
+          24.558798599814327,
+          16.491015917750286,
+          15.685538048516035,
+          15.696634298955287,
+          15.40850182138423,
+          15.350342717609204,
+          15.116835210210287,
+          15.326957991188241,
+          15.194298666807656,
+          15.243697928142144
+        ],
+        "best_epoch": 6,
+        "mean_abs_change": 0.20423753559589386,
+        "seconds": 23.699861526489258
+      },
+      "0.01": {
+        "checkpoint_year": 2020,
+        "lr": 0.01,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 1,
+        "holdout_mae": [
+          24.558798599814327,
+          15.624866525344084,
+          15.201316356061545,
+          15.597403580117385,
+          15.211812437002148,
+          15.217377233596737
+        ],
+        "best_epoch": 2,
+        "mean_abs_change": 0.20654715597629547,
+        "seconds": 12.962570190429688
+      },
+      "0.03": {
+        "checkpoint_year": 2020,
+        "lr": 0.03,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 1,
+        "holdout_mae": [
+          24.558798599814327,
+          15.400813448133997,
+          15.297862394574716,
+          15.6934372899234,
+          15.482542948603001,
+          15.313898652187731
+        ],
+        "best_epoch": 2,
+        "mean_abs_change": 0.29926368594169617,
+        "seconds": 13.086400747299194
+      }
+    }
+  }
+}

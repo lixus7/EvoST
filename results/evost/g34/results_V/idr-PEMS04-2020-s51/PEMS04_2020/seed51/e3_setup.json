@@ -1,0 +1,161 @@
+{
+  "dataset": "PEMS04",
+  "year": 2020,
+  "seed": 51,
+  "nodes": 3894,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "same_mean",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "mean"
+    },
+    {
+      "name": "same_prof",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "loo_prof"
+    },
+    {
+      "name": "same_rand",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "loo_rand"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o_mean",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "mean"
+    },
+    {
+      "name": "don_prof",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "don_prof"
+    },
+    {
+      "name": "don_rand",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "don_rand"
+    },
+    {
+      "name": "new_prof",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "new_prof"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit"
+    },
+    {
+      "name": "same_geo",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "loo_geo"
+    },
+    {
+      "name": "don_geo",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "don_geo"
+    },
+    {
+      "name": "new_geo",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "new_geo"
+    },
+    {
+      "name": "nobb_zero",
+      "base": "zero",
+      "ckpt": null,
+      "norm": 2020,
+      "age": null,
+      "variant": null
+    },
+    {
+      "name": "nobb_last",
+      "base": "last",
+      "ckpt": null,
+      "norm": 2020,
+      "age": null,
+      "variant": null
+    }
+  ],
+  "reference_check": {
+    "reference": "not stored for this graph size"
+  },
+  "norm": {
+    "2020": [
+      150.51785819890378,
+      168.49615948683757
+    ],
+    "2015": [
+      154.9041585285333,
+      161.87811115852026
+    ],
+    "2010": [
+      205.0733889363226,
+      154.74583057173052
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "eight-district",
+  "peak_gpu_gib": 60.77354955673218,
+  "cohort_reference_year": 2015,
+  "chunk": 128,
+  "select_seconds": 1731.6596505641937,
+  "stream_seconds": 1226.4885702133179
+}

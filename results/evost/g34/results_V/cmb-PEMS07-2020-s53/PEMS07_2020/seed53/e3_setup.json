@@ -1,0 +1,153 @@
+{
+  "dataset": "PEMS07",
+  "year": 2020,
+  "seed": 53,
+  "nodes": 4881,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "new_prof",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "new_prof"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit"
+    },
+    {
+      "name": "fit_prof",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_prof"
+    },
+    {
+      "name": "on_stale",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on:full"
+    },
+    {
+      "name": "on_prof",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on:new_prof"
+    },
+    {
+      "name": "on_emb",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on:fit"
+    },
+    {
+      "name": "on_fit",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on:fit_prof"
+    },
+    {
+      "name": "on_same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "on:full"
+    },
+    {
+      "name": "on_fit_lo",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on@0.0003:fit_prof"
+    },
+    {
+      "name": "on_fit_hi",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "on@0.003:fit_prof"
+    },
+    {
+      "name": "on_same_lo",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "on@0.0003:full"
+    },
+    {
+      "name": "on_same_hi",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "on@0.003:full"
+    }
+  ],
+  "reference_check": {
+    "reference": "not stored for this graph size"
+  },
+  "norm": {
+    "2020": [
+      138.912174481338,
+      185.5394565784718
+    ],
+    "2015": [
+      130.8395716367429,
+      178.31519259276854
+    ],
+    "2010": [
+      120.80649577588309,
+      175.4693117854916
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "extension",
+  "peak_gpu_gib": 44.97569179534912,
+  "cohort_reference_year": 2015,
+  "chunk": 128,
+  "select_seconds": 2551.660026550293,
+  "stream_seconds": 2662.039622783661
+}

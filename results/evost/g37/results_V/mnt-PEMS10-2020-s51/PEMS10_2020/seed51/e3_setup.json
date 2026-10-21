@@ -1,0 +1,114 @@
+{
+  "dataset": "PEMS10",
+  "year": 2020,
+  "seed": 51,
+  "nodes": 1152,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_emb"
+    },
+    {
+      "name": "fit_emb_sel",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_emb_sel"
+    },
+    {
+      "name": "fit_all",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_all"
+    },
+    {
+      "name": "fit_shared",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_shared"
+    },
+    {
+      "name": "fit_head",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit_head"
+    },
+    {
+      "name": "fit_same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "fit_same"
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.0001373291015625,
+      "reference_abs_max": 403.1336364746094,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.00014495849609375,
+      "reference_abs_max": 380.8772277832031,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2020": [
+      73.7995850145262,
+      98.93185899002603
+    ],
+    "2015": [
+      50.42613388584453,
+      82.83898089610422
+    ],
+    "2010": [
+      112.71680549408934,
+      94.1882370577365
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 12.531877517700195,
+  "cohort_reference_year": 2015,
+  "chunk": 512,
+  "select_seconds": 1044.0340752601624,
+  "stream_seconds": 89.52628540992737
+}

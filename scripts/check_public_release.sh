@@ -43,20 +43,29 @@ scan_text() {
 scan_notebooks() {
     local pattern=$1
     local notebook
-    if ! command -v jq >/dev/null 2>&1; then
-        printf '[privacy] jq is required to inspect notebook text safely.\n' >&2
-        failed=1
-        return
-    fi
     for notebook in "${notebooks[@]}"; do
-        if jq -r '
-            paths(strings) as $path
-            | select(all($path[];
-                . != "image/png"
-                and . != "image/jpeg"
-                and . != "application/pdf"))
-            | getpath($path)
-        ' "$notebook" 2>/dev/null | rg -i -e "$pattern" >/dev/null; then
+        if ! python3 -m json.tool "$notebook" >/dev/null 2>&1; then
+            printf '[privacy] cannot parse notebook: %s\n' "$notebook" >&2
+            failed=1
+            continue
+        fi
+        if python3 - "$notebook" <<'PY' | rg -i -e "$pattern" >/dev/null
+import json
+import sys
+def strings(value):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key not in {'image/png', 'image/jpeg', 'application/pdf'}:
+                strings(item)
+    elif isinstance(value, list):
+        for item in value:
+            strings(item)
+    elif isinstance(value, str):
+        print(value)
+with open(sys.argv[1]) as handle:
+    strings(json.load(handle))
+PY
+        then
             printf '[privacy] notebook text or metadata: %s\n' "$notebook" >&2
             failed=1
         fi

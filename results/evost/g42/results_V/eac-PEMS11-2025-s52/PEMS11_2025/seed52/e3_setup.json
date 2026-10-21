@@ -1,0 +1,111 @@
+{
+  "dataset": "PEMS11",
+  "year": 2025,
+  "seed": 52,
+  "nodes": 1440,
+  "layout": "g29",
+  "checkpoint_years": [
+    2025,
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit_emb"
+    },
+    {
+      "name": "fit_emb_sel",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit_emb_sel"
+    },
+    {
+      "name": "fit_prompt",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit_prompt"
+    },
+    {
+      "name": "fit_emb_prompt",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit_emb_prompt"
+    },
+    {
+      "name": "fit_scratch",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "fit_scratch"
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.0001220703125,
+      "reference_abs_max": 470.67315673828125,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.00018310546875,
+      "reference_abs_max": 630.5276489257812,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2025": [
+      127.55885314644634,
+      161.00907862733504
+    ],
+    "2020": [
+      132.47580364723237,
+      163.48631594254022
+    ],
+    "2015": [
+      131.17652531582863,
+      157.9868675107263
+    ],
+    "2010": [
+      129.58416086628532,
+      159.69919470172397
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 17.320964813232422,
+  "cohort_reference_year": 2020,
+  "chunk": 512,
+  "select_seconds": 1990.8294768333435,
+  "stream_seconds": 104.00290107727051
+}

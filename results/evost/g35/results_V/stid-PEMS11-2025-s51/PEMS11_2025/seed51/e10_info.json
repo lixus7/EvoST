@@ -1,0 +1,55 @@
+{
+  "stid_checkpoints": {
+    "2020": {
+      "file": "PEMS11_2020_s42.npz",
+      "best_epoch": 26,
+      "epochs_run": 33,
+      "lowest_validation_loss": 16.9585,
+      "test_T12_MAE": 17.445453894281744
+    },
+    "2025": {
+      "file": "PEMS11_2025_s42.npz",
+      "best_epoch": 36,
+      "epochs_run": 43,
+      "lowest_validation_loss": 17.5574,
+      "test_T12_MAE": 18.318905316679853
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 1440,
+  "sensors_old_year": 1488,
+  "known": 1362,
+  "unknown": 78,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.18135095447870778,
+  "geo_arms": true,
+  "old_bundle": "PEMS11_2020.npz",
+  "fit": {
+    "checkpoint_year": 2020,
+    "lr": 0.003,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 2,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "batch_windows": 4,
+    "holdout_mae": [
+      17.4709904925651,
+      16.73064439620015,
+      16.52354649804185,
+      16.496408422890894,
+      16.434601128377647,
+      16.40063199142855,
+      16.427135688115232,
+      16.40363178647465,
+      16.387621474629178,
+      16.4210383653758,
+      16.430589475773466,
+      16.410421517019063
+    ],
+    "best_epoch": 8,
+    "mean_abs_change": 0.15104328095912933,
+    "seconds": 12.556535959243774
+  }
+}

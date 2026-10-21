@@ -1,0 +1,143 @@
+{
+  "gwn_checkpoints": {
+    "2015": {
+      "file": "PEMS11_2015_s43.npz",
+      "best_epoch": 24,
+      "epochs_run": 31,
+      "lowest_validation_loss": 20.5606,
+      "test_T12_MAE": 18.345309691842235
+    },
+    "2020": {
+      "file": "PEMS11_2020_s43.npz",
+      "best_epoch": 17,
+      "epochs_run": 24,
+      "lowest_validation_loss": 20.0265,
+      "test_T12_MAE": 18.303796659431068
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 1488,
+  "sensors_old_year": 1479,
+  "known": 1305,
+  "unknown": 183,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.3164750957854406,
+  "geo_arms": true,
+  "old_bundle": "PEMS11_2015.npz",
+  "fit": {
+    "checkpoint_year": 2015,
+    "lr": 0.01,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 2,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "batch_windows": 4,
+    "holdout_mae": [
+      25.120047904589182,
+      15.045876207084875,
+      15.091171112667968,
+      15.33301164602419,
+      15.33651609731433
+    ],
+    "best_epoch": 1,
+    "mean_abs_change": 0.20585741102695465,
+    "seconds": 55.131062269210815,
+    "selected_lr": 0.01,
+    "candidates": {
+      "0.001": {
+        "checkpoint_year": 2015,
+        "lr": 0.001,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          25.120047904589182,
+          18.029950848337634,
+          16.059430355705086,
+          15.706113255205272,
+          15.567897704518831,
+          15.471992002396723,
+          15.341662242874587,
+          15.234835150976652,
+          15.0991396980748,
+          15.135167049551312,
+          15.089048343816554,
+          15.10897554870049,
+          15.098084084289969,
+          15.138899091697468
+        ],
+        "best_epoch": 10,
+        "mean_abs_change": 0.19787313044071198,
+        "seconds": 26.957820653915405
+      },
+      "0.003": {
+        "checkpoint_year": 2015,
+        "lr": 0.003,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          25.120047904589182,
+          15.69228793403416,
+          15.253840890265055,
+          15.17145384201585,
+          15.163482987872595,
+          15.258880485716855,
+          15.177745611648998,
+          15.190746964342841
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.20903249084949493,
+        "seconds": 13.139808416366577
+      },
+      "0.01": {
+        "checkpoint_year": 2015,
+        "lr": 0.01,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          25.120047904589182,
+          15.045876207084875,
+          15.091171112667968,
+          15.33301164602419,
+          15.33651609731433
+        ],
+        "best_epoch": 1,
+        "mean_abs_change": 0.20585741102695465,
+        "seconds": 7.01887583732605
+      },
+      "0.03": {
+        "checkpoint_year": 2015,
+        "lr": 0.03,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          25.120047904589182,
+          15.358370052222506,
+          15.401336707300565,
+          15.466601850574637,
+          15.724836448986627
+        ],
+        "best_epoch": 1,
+        "mean_abs_change": 0.2967224717140198,
+        "seconds": 8.014557361602783
+      }
+    }
+  }
+}

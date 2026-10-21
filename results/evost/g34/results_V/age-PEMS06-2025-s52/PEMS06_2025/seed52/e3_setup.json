@@ -1,0 +1,153 @@
+{
+  "dataset": "PEMS06",
+  "year": 2025,
+  "seed": 52,
+  "nodes": 746,
+  "layout": "g29",
+  "checkpoint_years": [
+    2025,
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "same_mean",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "mean"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "mean5",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "mean"
+    },
+    {
+      "name": "fit5",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit"
+    },
+    {
+      "name": "stale10o",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 10,
+      "variant": "full"
+    },
+    {
+      "name": "mean10",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 10,
+      "variant": "mean"
+    },
+    {
+      "name": "fit10",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 10,
+      "variant": "fit"
+    },
+    {
+      "name": "stale15o",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 15,
+      "variant": "full"
+    },
+    {
+      "name": "mean15",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 15,
+      "variant": "mean"
+    },
+    {
+      "name": "fit15",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 15,
+      "variant": "fit"
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 9.1552734375e-05,
+      "reference_abs_max": 285.25140380859375,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 9.1552734375e-05,
+      "reference_abs_max": 285.2710876464844,
+      "windows": 2
+    },
+    "stale10o": {
+      "max_abs_difference": 6.103515625e-05,
+      "reference_abs_max": 290.0474548339844,
+      "windows": 2
+    },
+    "stale15o": {
+      "max_abs_difference": 9.1552734375e-05,
+      "reference_abs_max": 316.7266845703125,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2025": [
+      96.22143595131357,
+      86.81094205039905
+    ],
+    "2020": [
+      98.26608078110797,
+      89.44903096740558
+    ],
+    "2015": [
+      93.77697340004858,
+      93.9000767615119
+    ],
+    "2010": [
+      90.85716199601703,
+      96.59069356514786
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 13.146968364715576,
+  "cohort_reference_year": 2020,
+  "chunk": 512,
+  "select_seconds": 189.5302848815918,
+  "stream_seconds": 57.36024856567383
+}

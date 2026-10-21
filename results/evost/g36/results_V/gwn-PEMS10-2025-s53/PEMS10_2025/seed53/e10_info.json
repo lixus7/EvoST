@@ -1,0 +1,155 @@
+{
+  "gwn_checkpoints": {
+    "2020": {
+      "file": "PEMS10_2020_s44.npz",
+      "best_epoch": 7,
+      "epochs_run": 14,
+      "lowest_validation_loss": 13.6682,
+      "test_T12_MAE": 12.756205943500213
+    },
+    "2025": {
+      "file": "PEMS10_2025_s44.npz",
+      "best_epoch": 18,
+      "epochs_run": 25,
+      "lowest_validation_loss": 11.8454,
+      "test_T12_MAE": 11.30879464532876
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 1396,
+  "sensors_old_year": 1152,
+  "known": 1099,
+  "unknown": 297,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.26205641492265697,
+  "geo_arms": true,
+  "old_bundle": "PEMS10_2020.npz",
+  "fit": {
+    "checkpoint_year": 2020,
+    "lr": 0.01,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 2,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "batch_windows": 4,
+    "holdout_mae": [
+      11.936175671644156,
+      10.026607589658191,
+      9.964725141421058,
+      9.96962617656227,
+      9.902090582761849,
+      9.957205996543768,
+      9.918194285799757,
+      10.021991999697569
+    ],
+    "best_epoch": 4,
+    "mean_abs_change": 0.26797449588775635,
+    "seconds": 83.16550374031067,
+    "selected_lr": 0.01,
+    "candidates": {
+      "0.001": {
+        "checkpoint_year": 2020,
+        "lr": 0.001,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          11.936175671644156,
+          10.863144840849746,
+          10.445277833707523,
+          10.274296815109828,
+          10.184473211343954,
+          10.123824171949865,
+          10.066067217416059,
+          10.034488222732223,
+          10.01243957282317,
+          9.98513235241286,
+          9.975568630499685,
+          9.95691981714297,
+          9.9594977325914,
+          9.930222481870567,
+          9.945418633238496,
+          9.922334890779451,
+          9.954379867709228
+        ],
+        "best_epoch": 15,
+        "mean_abs_change": 0.2106269747018814,
+        "seconds": 38.20218515396118
+      },
+      "0.003": {
+        "checkpoint_year": 2020,
+        "lr": 0.003,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          11.936175671644156,
+          10.316296759411541,
+          10.094561718858,
+          9.996826653306819,
+          9.95441908019078,
+          9.971561871302603,
+          9.959793076938627,
+          9.957420427262887
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.19200994074344635,
+        "seconds": 14.771698236465454
+      },
+      "0.01": {
+        "checkpoint_year": 2020,
+        "lr": 0.01,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          11.936175671644156,
+          10.026607589658191,
+          9.964725141421058,
+          9.96962617656227,
+          9.902090582761849,
+          9.957205996543768,
+          9.918194285799757,
+          10.021991999697569
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.26797449588775635,
+        "seconds": 15.416384935379028
+      },
+      "0.03": {
+        "checkpoint_year": 2020,
+        "lr": 0.03,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          11.936175671644156,
+          10.008529470301442,
+          10.040826758590581,
+          10.036235180191982,
+          9.914672739441846,
+          9.994665066328428,
+          9.99799875903125,
+          10.091188613043684
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.3837117552757263,
+        "seconds": 14.775235414505005
+      }
+    }
+  }
+}

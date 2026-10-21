@@ -1,0 +1,57 @@
+{
+  "dataset": "PEMS08",
+  "year": 2025,
+  "seed": 52,
+  "nodes": 2074,
+  "budget": 2048,
+  "fit_windows": 2048,
+  "select_windows": 1024,
+  "fit_holdout": 512,
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit@2048"
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.00048828125,
+      "reference_abs_max": 922.133056640625,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.00048828125,
+      "reference_abs_max": 715.55224609375,
+      "windows": 2
+    }
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "cohort_reference_year": 2020,
+  "chunk": 512,
+  "select_seconds": 206.79225826263428,
+  "stream_seconds": 42.76799178123474
+}

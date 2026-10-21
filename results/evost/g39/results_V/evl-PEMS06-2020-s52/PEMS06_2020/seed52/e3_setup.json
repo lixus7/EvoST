@@ -1,0 +1,114 @@
+{
+  "dataset": "PEMS06",
+  "year": 2020,
+  "seed": 52,
+  "nodes": 630,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same_rp",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale_rp",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "same_nt",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "nt:full"
+    },
+    {
+      "name": "stale_nt",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "nt:full"
+    },
+    {
+      "name": "fit_nt",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "nt:fit"
+    },
+    {
+      "name": "same_tm",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "tm:full"
+    },
+    {
+      "name": "stale_tm",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "tm:full"
+    },
+    {
+      "name": "fit_tm",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "tm:fit"
+    }
+  ],
+  "reference_check": {
+    "same_rp": {
+      "max_abs_difference": 9.1552734375e-05,
+      "reference_abs_max": 457.2425537109375,
+      "windows": 2
+    },
+    "stale_rp": {
+      "max_abs_difference": 9.1552734375e-05,
+      "reference_abs_max": 415.022705078125,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2020": [
+      98.26608078110797,
+      89.44903096740558
+    ],
+    "2015": [
+      93.77697340004858,
+      93.9000767615119
+    ],
+    "2010": [
+      90.85716199601703,
+      96.59069356514786
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 10.234925270080566,
+  "cohort_reference_year": 2015,
+  "chunk": 512,
+  "select_seconds": 106.81164264678955,
+  "stream_seconds": 38.84666395187378
+}

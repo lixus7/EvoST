@@ -1,0 +1,85 @@
+{
+  "dataset": "PEMS12",
+  "year": 2015,
+  "seed": 52,
+  "nodes": 2365,
+  "layout": "g29",
+  "checkpoint_years": [
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "same_mean",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 0,
+      "variant": "mean"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "mean5",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 5,
+      "variant": "mean"
+    },
+    {
+      "name": "fit5",
+      "base": "stae",
+      "ckpt": 2010,
+      "norm": 2010,
+      "age": 5,
+      "variant": "fit"
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.00079345703125,
+      "reference_abs_max": 748.2996215820312,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.0006103515625,
+      "reference_abs_max": 697.6332397460938,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2015": [
+      114.64148801470981,
+      164.0277666527965
+    ],
+    "2010": [
+      109.86624089067986,
+      167.8496578922802
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 38.63221263885498,
+  "cohort_reference_year": 2010,
+  "chunk": 512,
+  "select_seconds": 388.6818997859955,
+  "stream_seconds": 234.06130838394165
+}

@@ -11,7 +11,7 @@ Run order, per dataset `pemsNN`:
 |------|-------------------|----------|
 | 1 | `pemsNN_yearly_nodes.ipynb` | the set of active sensors for each year (the expanding-node bookkeeping) |
 | 2 | `pemsNN_build_eac_data.ipynb` | `RawData/<year>.npz` flow tensors + `graph/<year>_adj.npz` adjacency |
-| — | `pems03_build_adj.ipynb` | reference notebook for adjacency construction (distance/connectivity → weighted graph) |
+| — | `pems03_build_adj.ipynb` | reference notebook for adjacency construction (coordinate proximity → weighted graph) |
 | — | `pems03_data_quality_check.py` | audits raw years for NaN / missing detectors |
 | — | `pems_all_growth_viz.ipynb` | visualizes sensor-count growth across all 9 datasets |
 

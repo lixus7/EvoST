@@ -1,0 +1,157 @@
+{
+  "gwn_checkpoints": {
+    "2015": {
+      "file": "PEMS11_2015_s44.npz",
+      "best_epoch": 22,
+      "epochs_run": 29,
+      "lowest_validation_loss": 20.6162,
+      "test_T12_MAE": 18.867361494370844
+    },
+    "2020": {
+      "file": "PEMS11_2020_s44.npz",
+      "best_epoch": 16,
+      "epochs_run": 23,
+      "lowest_validation_loss": 20.1756,
+      "test_T12_MAE": 17.639012267969253
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 1488,
+  "sensors_old_year": 1479,
+  "known": 1305,
+  "unknown": 183,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.3164750957854406,
+  "geo_arms": true,
+  "old_bundle": "PEMS11_2015.npz",
+  "fit": {
+    "checkpoint_year": 2015,
+    "lr": 0.003,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 2,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "batch_windows": 4,
+    "holdout_mae": [
+      23.62167188807817,
+      15.433157997088054,
+      15.16686901843982,
+      14.917696258288645,
+      14.917564049503067,
+      14.812631447661099,
+      14.79810385010719,
+      14.79856603562812,
+      14.858754076114321,
+      14.831319395524307
+    ],
+    "best_epoch": 6,
+    "mean_abs_change": 0.2155558317899704,
+    "seconds": 70.80470681190491,
+    "selected_lr": 0.003,
+    "candidates": {
+      "0.001": {
+        "checkpoint_year": 2015,
+        "lr": 0.001,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          23.62167188807817,
+          16.793322436860628,
+          15.792444296812317,
+          15.403949581767954,
+          15.219482984828096,
+          15.078307647919273,
+          14.96366005323656,
+          14.9218767491226,
+          14.905821684518353,
+          14.886747978277741,
+          14.898235725168957,
+          14.881270472784765,
+          14.84059891538591,
+          14.848392303111149,
+          14.812232494019904,
+          14.821908157216935,
+          14.832633132966338
+        ],
+        "best_epoch": 14,
+        "mean_abs_change": 0.19824698567390442,
+        "seconds": 31.85590696334839
+      },
+      "0.003": {
+        "checkpoint_year": 2015,
+        "lr": 0.003,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          23.62167188807817,
+          15.433157997088054,
+          15.16686901843982,
+          14.917696258288645,
+          14.917564049503067,
+          14.812631447661099,
+          14.79810385010719,
+          14.79856603562812,
+          14.858754076114321,
+          14.831319395524307
+        ],
+        "best_epoch": 6,
+        "mean_abs_change": 0.2155558317899704,
+        "seconds": 16.46601963043213
+      },
+      "0.01": {
+        "checkpoint_year": 2015,
+        "lr": 0.01,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          23.62167188807817,
+          14.975845034060907,
+          15.003671898675362,
+          14.845296604939861,
+          14.941409720800806,
+          14.967558437673741,
+          14.992622252106441
+        ],
+        "best_epoch": 3,
+        "mean_abs_change": 0.2514618933200836,
+        "seconds": 11.139449834823608
+      },
+      "0.03": {
+        "checkpoint_year": 2015,
+        "lr": 0.03,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 2,
+        "train_windows": 768,
+        "holdout_windows": 256,
+        "batch_windows": 4,
+        "holdout_mae": [
+          23.62167188807817,
+          15.27783602006371,
+          15.199905516641929,
+          15.000983958306303,
+          15.005587458706069,
+          15.3951243214868,
+          15.082917456870003
+        ],
+        "best_epoch": 3,
+        "mean_abs_change": 0.36276474595069885,
+        "seconds": 11.343330383300781
+      }
+    }
+  }
+}

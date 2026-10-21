@@ -1,0 +1,149 @@
+{
+  "dataset": "PEMS11",
+  "year": 2020,
+  "seed": 51,
+  "nodes": 1488,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "fit"
+    },
+    {
+      "name": "konly",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "konly"
+    },
+    {
+      "name": "c64_same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "c64:same",
+      "history": 64
+    },
+    {
+      "name": "c64_mean",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "c64:mean",
+      "history": 64
+    },
+    {
+      "name": "c64_prof0",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "c64:prof0",
+      "history": 64
+    },
+    {
+      "name": "s_mean_k",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "s:mean",
+      "history": 64,
+      "restart": false
+    },
+    {
+      "name": "s_mean_r",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "s:mean",
+      "history": 64,
+      "restart": true
+    },
+    {
+      "name": "s_prof0_k",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "s:prof0",
+      "history": 64,
+      "restart": false
+    },
+    {
+      "name": "s_prof0_r",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "s:prof0",
+      "history": 64,
+      "restart": true
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.000244140625,
+      "reference_abs_max": 514.4666748046875,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.000152587890625,
+      "reference_abs_max": 484.4022521972656,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2020": [
+      132.47580364723237,
+      163.48631594254022
+    ],
+    "2015": [
+      131.17652531582863,
+      157.9868675107263
+    ],
+    "2010": [
+      129.58416086628532,
+      159.69919470172397
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 17.64727020263672,
+  "cohort_reference_year": 2015,
+  "chunk": 256,
+  "select_seconds": 232.8476541042328,
+  "stream_seconds": 427.1446387767792
+}

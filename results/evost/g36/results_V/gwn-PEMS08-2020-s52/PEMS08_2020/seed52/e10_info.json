@@ -1,0 +1,153 @@
+{
+  "gwn_checkpoints": {
+    "2015": {
+      "file": "PEMS08_2015_s43.npz",
+      "best_epoch": 6,
+      "epochs_run": 13,
+      "lowest_validation_loss": 19.266,
+      "test_T12_MAE": 16.755160123542442
+    },
+    "2020": {
+      "file": "PEMS08_2020_s43.npz",
+      "best_epoch": 10,
+      "epochs_run": 17,
+      "lowest_validation_loss": 17.0146,
+      "test_T12_MAE": 15.321366242558222
+    }
+  },
+  "steps_per_day": 288,
+  "sensors": 1991,
+  "sensors_old_year": 1893,
+  "known": 1498,
+  "unknown": 493,
+  "old_sensors_without_data": 0,
+  "neighbours": 5,
+  "share_of_known_sensors_whose_closest_old_profile_is_their_own": 0.09212283044058744,
+  "geo_arms": true,
+  "old_bundle": "PEMS08_2015.npz",
+  "fit": {
+    "checkpoint_year": 2015,
+    "lr": 0.01,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 4,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "batch_windows": 2,
+    "holdout_mae": [
+      15.345550273981502,
+      13.748031969544183,
+      13.678280674384302,
+      13.69596938246232,
+      13.654233036479289,
+      13.716352792836942,
+      13.75857571882596,
+      13.725811173338707
+    ],
+    "best_epoch": 4,
+    "mean_abs_change": 0.29675808548927307,
+    "seconds": 52.728713035583496,
+    "selected_lr": 0.01,
+    "candidates": {
+      "0.001": {
+        "checkpoint_year": 2015,
+        "lr": 0.001,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 2,
+        "holdout_mae": [
+          15.345550273981502,
+          14.44265775024651,
+          14.18685185246634,
+          14.03371513276262,
+          13.93012517695803,
+          13.862367868718012,
+          13.81935641416754,
+          13.783468126117066,
+          13.75926465119053,
+          13.732940970852965,
+          13.717176102841911,
+          13.695942590981664,
+          13.680796028211292,
+          13.668266904141753,
+          13.661777144130546,
+          13.668472558363405,
+          13.66384369563114
+        ],
+        "best_epoch": 14,
+        "mean_abs_change": 0.2075301706790924,
+        "seconds": 25.169459104537964
+      },
+      "0.003": {
+        "checkpoint_year": 2015,
+        "lr": 0.003,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 2,
+        "holdout_mae": [
+          15.345550273981502,
+          14.023860594184285,
+          13.825905160188713,
+          13.727825468080841,
+          13.677049603392215,
+          13.707080064361552,
+          13.712612431439133,
+          13.67718337523625
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.1946655511856079,
+        "seconds": 9.680100202560425
+      },
+      "0.01": {
+        "checkpoint_year": 2015,
+        "lr": 0.01,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 2,
+        "holdout_mae": [
+          15.345550273981502,
+          13.748031969544183,
+          13.678280674384302,
+          13.69596938246232,
+          13.654233036479289,
+          13.716352792836942,
+          13.75857571882596,
+          13.725811173338707
+        ],
+        "best_epoch": 4,
+        "mean_abs_change": 0.29675808548927307,
+        "seconds": 11.031392574310303
+      },
+      "0.03": {
+        "checkpoint_year": 2015,
+        "lr": 0.03,
+        "max_epochs": 16,
+        "patience": 3,
+        "stride": 4,
+        "train_windows": 384,
+        "holdout_windows": 128,
+        "batch_windows": 2,
+        "holdout_mae": [
+          15.345550273981502,
+          13.785956901310772,
+          13.685967749977559,
+          13.769477340945599,
+          13.740558003288196,
+          13.844980770822717
+        ],
+        "best_epoch": 2,
+        "mean_abs_change": 0.3778191804885864,
+        "seconds": 6.847761154174805
+      }
+    }
+  }
+}
