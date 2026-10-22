@@ -31,7 +31,7 @@ The final arrival branch is `a_prof0_r` in [e21_handover2.py](../experiments/evo
 
 ## Delayed feedback and calibration
 
-Input length and forecast horizon are both 12. PeMS observations are five minutes apart, so H12 is one hour ahead. RLS updates every 64 windows and uses a forecast window only after all 12 labels have been released. A node-window enters calibration only when all targets are finite and nonzero. Identity fitting masks invalid targets element by element.
+Input length and forecast horizon are both 12. PeMS observations are five minutes apart, so the forecast window covers the next hour. RLS updates every 64 windows and uses a forecast window only after all 12 labels have been released. A node-window enters calibration only when all targets are finite and nonzero. Identity fitting masks invalid targets element by element.
 
 Each sensor has a 29-dimensional feature vector: the scaled base forecast, normalized input history, its last value, mean, population standard deviation, slope, and a constant. RLS starts from an exact ridge fit, uses float64 recursion, and symmetrizes the inverse covariance after each update. Ridge `{1, 100}` and forgetting factor `{1, 0.999, 0.995, 0.99}` are selected separately for each branch on the first 1,024 validation windows. The calibrator is then initialized again and validation and test are replayed chronologically. Reported results use the test portion.
 

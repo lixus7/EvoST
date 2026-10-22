@@ -1,6 +1,6 @@
 # Extended experiments and appendix
 
-The A²TTA results retain their original method names, metrics, and evaluation protocols. EvoST maintenance results are in the [EvoST results](evost_results.md). [Rendered appendix PDF](assets/extended_appendix.pdf) · [full LaTeX appendix](paper_sources/appendix.tex) · [bibliography](paper_sources/references.bib).
+The A²TTA results retain their original method names, metrics, and evaluation protocols. The [annual experiment section](annual_benchmark_analysis.md) supplies the original main results, delayed-label sweep, ablations, and case studies. EvoST maintenance results are in the [EvoST results](evost_results.md). [Rendered appendix PDF](assets/extended_appendix.pdf) · [full LaTeX appendix](paper_sources/appendix.tex) · [bibliography](paper_sources/references.bib).
 
 
 <a id="appendix"></a>

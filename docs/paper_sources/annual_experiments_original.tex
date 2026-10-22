@@ -1,0 +1,217 @@
+\section{Experiments}
+\label{exp}
+
+\input{table/main01.tex}
+
+
+\subsection{Experimental Settings}
+
+PeMS experiments use the first 31 days of each selected year;
+Table~\ref{tab:evo_scale} summarizes the full data archive.
+Each year uses a chronological 60\%/20\%/20\% train/validation/test split.
+PEMS windows contain 12 five-minute steps and TFNSW windows contain 12 hourly
+steps. All methods share the graph snapshots, splits, test windows, and metric
+code. Normalization uses training statistics only; residual non-finite inputs
+are set to zero after normalization, and invalid targets are masked.
+
+Online methods process one chronological window at a time, match nodes by
+metadata sensor IDs, and release each target after 12 steps. A$^2$TTA keeps
+512 released windows and updates its global state every 64 windows. Static
+methods receive the same windows without test labels. We report cumulative
+mean absolute error (MAE), root mean square error (RMSE), and mean absolute
+percentage error (MAPE) at horizons 3, 6, and 12. Avg averages the cumulative
+scores from horizons 1 to 12, with Avg-MAE as the primary metric. Results use
+five paired seeds unless noted otherwise.
+
+A$^2$TTA(OLAN) and A$^2$TTA(STAE) load and freeze the exact per-year
+Online-AN and STAEFormer checkpoints, respectively. Other than learning rate,
+their adaptation settings are shared. Appendix~\ref{app:hyper_details} lists
+the learning rates and sensitivity results.
+
+
+
+\subsection{Baselines}
+
+We compare nine static forecasters (DCRNN, ASTGNN, TGCN, GWN, STID, STNorm,
+iTrans, DLinear, and STAEFormer); Pretrain, Retrain, Online-NN, and Online-AN;
+four evolving-graph methods (TrafficStream, PECPM, STKEC, and EAC); STRAP and
+ST-TTC; and zero-shot (ZS) or yearly fine-tuned (FT) versions of Chronos-2,
+TimesFM~2.5, and Moirai-2.0.
+
+Each matched A$^2$TTA/backbone pair shares checkpoint seeds, yearly cohorts,
+and preprocessing. New-sensor results use the metadata set difference
+$\mathcal V_y\setminus\mathcal V_{y-1}$ at every graph-growing transition
+with the same five paired seeds. This isolates calibration from checkpoint,
+cohort, and node-order differences.
+
+\subsection{Main Results}
+
+
+
+\paragraph{Overall performance.}
+Results for three representative networks appear in
+\Cref{tab:main_by_method_part1}.
+A$^2$TTA(STAE) has the lowest MAE, RMSE, and MAPE on all three, reducing
+Avg-MAE over frozen STAEFormer by 9.4\%, 13.8\%, and 29.4\%. On TFNSW,
+A$^2$TTA(OLAN) reduces MAE from 130.61 to 86.78 (33.6\%) and RMSE from
+235.35 to 176.97 (24.8\%).
+
+\paragraph{Comparison with time-series foundation models.}
+TSFMs are reference rows and are not included in the non-foundation ranking.
+A$^2$TTA(STAE) outperforms every zero-shot and fine-tuned TSFM cell in
+\Cref{tab:main_by_method_part1}, while updating only its calibrator after
+label release. Appendix~\ref{appendix} reports the other seven PEMS districts
+and horizons 3, 6, and 12 for all ten networks
+(\cref{tab:main_by_method_part2,tab:main_by_method_part3,tab:main_part1,tab:main_part2}).
+
+
+% \input{table/main1.tex}
+% \input{table/main2.tex}
+
+
+
+\paragraph{Forecast horizons.}
+Across all 12 steps in \Cref{per_horizon}, A$^2$TTA(STAE) has the lowest error
+on PEMS03 and TFNSW. Its mean per-step MAE reductions over frozen STAEFormer
+are 8.2\% and 27.3\%. Appendix~\ref{appendix} gives results for all sensors and
+the newly added subset on all ten datasets
+(\cref{per_horizon_all_app,per_horizon_new_app}).
+% \input{table/newsensor1}
+% \input{table/newsensor2}
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/per_horizon_all_pems03_tfnsw_3x2.pdf}
+    \caption{All-sensor per-step errors on PEMS03 and TFNSW. Lower is better.}
+    \label{per_horizon}
+    \Description{Six line plots compare MAE, RMSE, and MAPE over forecast
+    steps 1 to 12 on PEMS03 and TFNSW.}
+\end{figure}
+
+\subsection{Delayed-Label Sensitivity}
+
+\Cref{fig:delay_sensitivity} uses all ten networks. For PEMS12, Avg-MAE rises by 0.68\% at 524 steps, 0.95\% at 1,036 steps, and 0.65\% without online labels. Across ten networks, the median increases at 524 steps are 0.62\% for A$^2$TTA(OLAN) and 0.63\% for A$^2$TTA(STAE); without online labels, they are 0.44\% and 0.80\%. The sweep changes only the release delay under the one-window protocol.
+
+ \begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/delayed_label_common_median_iqr.pdf}
+    \caption{Delayed-label sensitivity; bands show the interquartile range.}
+    \label{fig:delay_sensitivity}
+    \Description{Two curves show the median change in Avg-MAE as labels are
+    released later for the Online-AN and STAEFormer variants.}
+\end{figure}
+
+
+
+
+\subsection{Ablation Study}
+
+Full A$^2$TTA has the lowest Avg-MAE in seven of eight settings in
+\Cref{fig:ablation}. On Online-AN and STAEFormer, respectively, reverting to
+the frozen backbone raises error by 6.5\% and 6.7\%, replacing FiLM with a
+static affine transform by 3.7\% and 4.7\%, and removing the local clone by
+1.2\% and 1.6\%. Freezing FiLM after warm-up is worse in seven settings but
+better on STAEFormer with PEMS06. Appendix~\ref{app:ablation_details} defines
+the variants and gives the full results.
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/ablation_d_absolute_avg_mae_high_contrast.pdf}
+    \caption{Component knockouts on four PEMS datasets and two frozen backbones.}
+    \label{fig:ablation}
+    \Description{Grouped points compare the full method with four component
+    knockouts for Online-AN and STAEFormer on PEMS03 to PEMS06.}
+\end{figure}
+
+\subsection{Newly Added Sensors / High-Drift Periods}
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/new_sensor_baselines3.pdf}
+    \caption{New-sensor performance.}
+    \label{new}
+    \Description{Six bar charts compare newly added-sensor MAE, RMSE, and
+    MAPE on PEMS07 and TFNSW.}
+\end{figure}
+
+For the metadata-defined new-sensor cohort, A$^2$TTA(STAE) is best in five of
+six panels in \Cref{new}: all metrics on PEMS07 and MAE and MAPE on TFNSW.
+A$^2$TTA(OLAN) has lower TFNSW RMSE (177.20 versus 178.38).
+A$^2$TTA(STAE) reduces MAE over frozen STAEFormer by 8.8\% on PEMS07 and
+33.7\% on TFNSW. Appendix~\ref{app:new_sensors} gives all ten datasets.
+
+
+
+
+
+
+
+\paragraph{High-drift periods.}
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/drift_gain_main.pdf}
+    \caption{Performance across drift-severity quartiles.}
+    \label{fig:drift_gain}
+    \Description{Points and confidence intervals show MAE reduction across
+    quartiles of distribution drift and sensor churn.}
+\end{figure}
+
+\Cref{fig:drift_gain} groups paired dataset-year results by drift severity.
+A$^2$TTA improves both backbones in every quartile, with all 95\% bootstrap
+intervals above zero. Gains peak in the highest sensor-churn quartile at 9.0\%
+over Online-AN and 7.9\% over STAEFormer. This legacy-batched diagnostic shows
+an association, not a causal effect; Appendix~\ref{app:drift_details} gives
+the other metrics and aggregation.
+
+
+
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/case_a2_c_horizontal_PEMS06_2015.pdf}
+    \caption{Two-seed case study on PEMS06-2015.}
+    \label{fig:case}
+     \Description{Two traffic traces compare predictions at short and long
+    horizons, and two cohort plots summarize per-sensor MAE changes.}
+\end{figure}
+
+\subsection{Case Study}
+
+\Cref{fig:case} examines a high-variance PEMS06-2015 new sensor selected
+without using either method's errors. Over seeds 51 and 52, A$^2$TTA tracks
+the morning rise more closely, especially at 60 minutes. Across 366 sensors,
+it beats Online-AN on 99.7\% and STAEFormer on 98.6\%, reducing mean
+per-sensor MAE by 7.29\% and 2.62\%. Appendix~\ref{app:case_details} gives
+selection and cohort details.
+
+
+
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.99\linewidth]{fig/long_term_stability.pdf}
+    \caption{Long-term five-seed stability.}
+    \label{fig:long_term_stability}
+    \Description{Yearly curves show MAE gains over global-only adaptation and
+    frozen backbones for six long-running traffic streams.}
+\end{figure}
+
+\subsection{Long-Term Adaptation}
+
+The legacy-batched five-seed analysis in \Cref{fig:long_term_stability} covers
+six streams over 21 to 25 years. Gains over the frozen backbone are positive
+every year; gains over global-only TTA are smaller and less uniform.
+Appendix~\ref{app:long_term_details} gives a pre-specified single-seed check
+on all ten datasets.
+
+
+
+
+\paragraph{Deployment cost.}
+We profile 233 yearly snapshots on an H200. A$^2$TTA(STAE) takes 11.60\,ms
+per window versus 10.48\,ms for frozen STAEFormer and raises peak allocated
+memory from 10,021 to 10,552\,MiB. It updates 33.2K calibrator parameters on
+average versus 2.06M backbone parameters. A$^2$TTA(OLAN) takes 5.35\,ms
+versus 4.30\,ms. Appendix~\ref{app:protocol_cost} gives the three-repeat
+protocol and additional measurements.

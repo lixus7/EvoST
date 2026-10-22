@@ -17,10 +17,23 @@ Across twelve PeMS region-year settings, identity refresh reduces the relative M
 | Per-run metrics, calibration selections, and summaries | [Saved measurements](results/evost) |
 | Complete original baseline comparisons | [Annual benchmark table](tables/main_table.md) |
 | Original newly added sensor comparisons | [New-sensor table](tables/tsas_new_sensors.md) |
+| Original main results, delay sweep, ablations, and cases | [Annual benchmark analysis](docs/annual_benchmark_analysis.md) |
 | Per-horizon curves, drift, cost, sensitivity, and case studies | [Extended experiments](docs/extended_experiments.md) |
 | Current figures and editable graph/age plots | [Figure assets](docs/assets) · [plot sources](figures/evost) |
 
-The annual benchmark uses the original A²TTA method, including its FiLM calibrator and local clone. Its complete baselines, results, and runnable entry points remain in this repository. EvoST's maintenance experiments have their own checkpoint ages, metric definitions, and evaluation scope, described in the [protocol](docs/evost_protocol.md).
+The annual benchmark uses the original A²TTA method, including its FiLM calibrator and local clone. Its complete baselines, results, and runnable entry points remain in this repository. EvoST's maintenance experiments use different checkpoint ages, seed counts, and observation budgets, described in the [protocol](docs/evost_protocol.md). Both studies define cumulative-horizon metrics explicitly.
+
+## Paper and extended material
+
+The WWW draft allocates space according to the claims each experiment supports. The conference allows eight main-text pages and twelve pages in total, including references and appendix. [WWW 2027 formatting requirements](https://www2027.thewebconf.org/research-track-papers/).
+
+| Location | Evidence retained |
+|---|---|
+| Main text | Absolute MAE for all twelve primary settings; matched parameter, prompt, and scratch controls; STID and Graph WaveNet; checkpoint ages; sensor arrival and joint refitting. |
+| PDF appendix | Additional horizons and RMSE; fitting and delayed-feedback details; history budgets and fitting costs; the original baseline table for three representative networks; graph statistics and extended related work. |
+| Online record | Complete ten-network baseline tables and horizon curves; annual new-sensor cohorts; the original A²TTA delay sweep, ablations, drift analyses, long-term checks, cases, and mechanism visualizations; source and per-run records. |
+
+The main text contains the evidence for EvoST's core claims. The online material preserves the complete experimental record, including the earlier output-adaptation results under their original names and protocols. Start with [EvoST results](docs/evost_results.md), [annual benchmark analysis](docs/annual_benchmark_analysis.md), or the [extended appendix](docs/extended_experiments.md).
 
 ## Code and reproduction
 
