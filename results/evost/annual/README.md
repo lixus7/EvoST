@@ -28,7 +28,7 @@ All metrics are the strict values; no run had a non-finite forecast.
 
 ## per_step.csv
 
-For each network, stream (`method`: `evost`, `evost_frozen`, `evost_frozen_rls`, `evost_refit`) and seed, errors averaged over the network's years (`year_count`) with equal weight. `horizon` is `step1`–`step12` for single-step errors, `1`–`12` for cumulative horizons, or `Avg`. These are the values behind the per-step figures (Figures 4 and 7 of the extended version).
+For each network, stream (`method`: `evost`, `evost_frozen`, `evost_frozen_rls`, `evost_refit`) and seed, errors averaged over the network's years (`year_count`) with equal weight. `horizon` is `step1`–`step12` for single-step errors, `1`–`12` for cumulative horizons, or `Avg`. These are the values behind the per-step figures (Figures 3 and 10 of the extended version).
 
 ## summary.json
 

@@ -24,14 +24,14 @@ Numbers as reported in the paper; every one can be traced to the saved results i
 
 | Path | Content | Paper |
 |---|---|---|
-| [experiments/evost/](experiments/evost/README.md) `g33`–`g42` | Identity maintenance, parameter-group controls, prompt and scratch controls, checkpoint ages, STID and Graph WaveNet, history budgets, sensor arrival and joint refitting | Sections 6.4–6.7, appendix |
-| [experiments/evost/annual/](experiments/evost/annual/README.md) | Annual-benchmark runner (EvoST and matched controls) with the 1,165 run definitions | Section 6.3, Tables 2 and 5 (11 in the extended version) |
+| [experiments/evost/](experiments/evost/README.md) `g33`–`g42` | Identity maintenance, parameter-group controls, prompt and scratch controls, checkpoint ages, STID and Graph WaveNet, history budgets, sensor arrival and joint refitting | Sections 6.4–6.9, appendix |
+| [experiments/evost/annual/](experiments/evost/annual/README.md) | Annual-benchmark runner (EvoST and matched controls) with the 1,165 run definitions | Section 6.3, Table 1 and Figure 6 (Tables 1 and 9 in the extended version) |
 | [results/evost/](results/evost) | Per-run records and summaries of the maintenance experiments | |
 | [results/evost/annual/](results/evost/annual/README.md) | Per-run, per-step and summary results of the annual benchmark | |
 | [scripts/render_evost_results.py](scripts/render_evost_results.py), [scripts/render_annual_results.py](scripts/render_annual_results.py) | Rebuild or check the reported numbers from the saved results; no model execution | |
 | [tables/](tables/README.md) | LaTeX sources of the paper's tables | |
 | [figures/](figures/evost/README.md), [docs/assets/](docs/assets) | Plot scripts and rendered figures | |
-| `main.py`, `src/`, `conf/`, `*_main.py`, `scripts/*_run.sh` | Annual-benchmark baselines ([guide](docs/baselines.md)) | Table 2 |
+| `main.py`, `src/`, `conf/`, `*_main.py`, `scripts/*_run.sh` | Annual-benchmark baselines ([guide](docs/baselines.md)) | Table 1 |
 | [data/](data/README.md) | EvoXXLTraffic download, layout and processing | Section 3 |
 | [utils/window_stats.py](utils/window_stats.py) | Training-input statistics used to standardize EvoST inputs | |
 

@@ -1,6 +1,6 @@
 # Annual-benchmark baselines
 
-This guide covers the conventional forecasters, continual methods, test-time calibration and time-series foundation models of the annual benchmark (Table 2 of the paper; Tables 7–10 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST runs of the same benchmark are described in [evost_annual.md](evost_annual.md).
+This guide covers the conventional forecasters, continual methods, test-time calibration and time-series foundation models of the annual benchmark (Table 1 of the paper; Tables 5–8 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST runs of the same benchmark are described in [evost_annual.md](evost_annual.md).
 
 ## Environment
 
