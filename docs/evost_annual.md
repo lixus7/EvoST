@@ -9,7 +9,7 @@ The annual benchmark evaluates every yearly snapshot of the nine EvoXXLTraffic d
 | Refresh | refreshed | no |
 | EvoST | refreshed | yes |
 
-These are the matched controls of the paper (Figure 6 of the submission; Table 9 and Figure 11 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST rows of the result tables (Table 1; Tables 5–8 of the extended version) and the per-step figures (Figures 3 and 10 of the extended version) come from the same runs.
+These are the matched controls of the paper (Figure 8 of the submission; Table 9 and Figure 11 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST rows of the result tables (Table 1; Tables 5–8 of the extended version) and the per-step figures (Figures 5 and 10 of the extended version) come from the same runs.
 
 ## Runs
 

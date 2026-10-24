@@ -1,7 +1,7 @@
 """Recompute the annual-benchmark summaries of the paper from the committed per-cell results; no model execution.
 
 Usage:
-    python scripts/render_annual_results.py            # print the ten-network table (Table 11 of the extended version)
+    python scripts/render_annual_results.py            # print the ten-network table (Table 9 of the extended version)
     python scripts/render_annual_results.py --check    # also compare every recomputed value with results/evost/annual/summary.json
 
 Inputs: results/evost/annual/cells.csv (one row per network, year, evaluation seed and stream) and

@@ -7,7 +7,7 @@
 | Checkpoint age | [plot script](plot_checkpoint_age.py), [values](checkpoint_age.json) | [age PDF](../../docs/assets/evost_checkpoint_age.pdf) |
 | Sensor graph evolution | [plot script](plot_graph_evo.py), [integer counts](graph/graph_statistics.csv) | [graph PDF](../../docs/assets/fig_graph_evo.pdf) |
 
-The presentation files contain editable native shapes and text. Their file names retain the original drawing identifiers. In the paper, Figure 2 is the methodology illustration; the dataset overview is Figure 8 of the extended version.
+The presentation files contain editable native shapes and text. Their file names retain the original drawing identifiers. In the paper, Figure 2 is the methodology illustration; the dataset overview is Figure 6 of the submission (Figure 8 of the extended version).
 
 Run the two numerical plot scripts from the repository root:
 
