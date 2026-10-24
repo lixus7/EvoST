@@ -1,0 +1,14 @@
+\begin{table}[t]
+\centering
+\caption{Five-year reuse on sixteen region-year settings (eight districts, 2020 and 2025). Calibrated test H12 MAE relative to each backbone's calibrated target-year checkpoint; geometric means after averaging three seeds per setting. STAEFormer and STID use a fixed refresh learning rate of $3\times10^{-3}$. Recovery is the fraction of the old-to-reference error gap closed.}
+\label{tab:backbones}
+\begin{tabular}{lrrrr}
+\toprule
+Backbone & Settings & Old & Refresh & Recovery \\
+\midrule
+STAEFormer & 16 & 1.180 & 1.033 & 82\% \\
+STID & 16 & 1.045 & 1.015 & 67\% \\
+Graph WaveNet & 16 & 1.091 & 1.011 & 88\% \\
+\bottomrule
+\end{tabular}
+\end{table}

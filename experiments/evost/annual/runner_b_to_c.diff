@@ -1,0 +1,140 @@
+--- runner_b/e24_annual.py
++++ runner_c/e24_annual.py
+@@ -59,7 +59,7 @@
+ import e15_maintain as e15
+ import g28_common as g
+ 
+-VERSION = 'e24-annual-2026-10-24b'
++VERSION = 'e24-annual-2026-10-24c'     # c: zero-label fallback (PEMS06-2005-OPTIONS.md, option A); otherwise identical to b
+ LABELS = [str(i) for i in range(1, 13)] + ['step%d' % i for i in range(1, 13)] + ['Avg']
+ SCREEN_ABS, SCREEN_REL = 1e-4, 1e-5
+ RUNTIME_RULE = 1e-3                     # g30 / g37 run-time reference rule: max|d| <= 1e-3 (1 + max|ref|)
+@@ -98,7 +98,23 @@
+         self.old = None
+         self._variant, self._donors, self.info = {}, None, {}
+         self._tuned, self.peak_seen = {}, 0.
++        self.zero_label = None                         # e24-annual c: set by main() only when the fitting window has no valid label
+         e10.RefreshBundle.last = self
++
++    def tuned(self, name, device):
++        """e24-annual c: with no valid label in the fitting window the arm keeps the checkpoint identities and no candidate is fitted;
++        otherwise exactly e15_maintain.MaintainBundle.tuned."""
++        if self.zero_label is None or name in self._tuned:
++            return super().tuned(name, device)
++        which, _groups, _rates = e15.ARMS[name]
++        ckpt = self.old if which == 'old' else self.year
++        model = self.model(ckpt, device)
++        table = e5.StaeBundle.table(self, ckpt, device)
++        self._tuned[name] = (model, table)
++        self.info[name] = dict(skipped='no_valid_fit_label', identities='checkpoint', valid_fit_targets=0, candidates=None, lr=None,
++                               selected_lr=None, best_epoch=None, epochs_run=None, seconds=0., peak_gpu_gib=None,
++                               window_start=self.zero_label['window_start'], window_count=self.zero_label['window_count'])
++        return self._tuned[name]
+ 
+     def adjacency(self, device):
+         return None
+@@ -227,7 +243,12 @@
+     n_test = g.n_windows(test) if not max_windows else min(max_windows, g.n_windows(test))
+     _, y_fit = g.get_windows(train, fit_piece[1], fit_n)
+     y_fit = g.clean_y(y_fit)
+-    scale = float(y_fit[g.target_valid(y_fit)].std())                     # as e3_confirm.run
++    zero_label = int(g.target_valid(y_fit).sum()) == 0                    # e24-annual c trigger, as e3_confirm.run
++    if zero_label:
++        assert e3.ZERO_LABEL is not None, 'no valid label in the fitting window and no fallback scale was set'
++        scale = e3.ZERO_LABEL['scale']
++    else:
++        scale = float(y_fit[g.target_valid(y_fit)].std())                     # as e3_confirm.run
+     del y_fit
+     r = len(arms)
+     ridge = torch.tensor([chosen[a['name']][0] for a in arms], dtype=torch.float64).repeat_interleave(n)
+@@ -235,7 +256,7 @@
+     _, fn = e3.make_chunks(B, None, None, device, arms, [fit_piece])         # e3_confirm.run's fitted(), unchanged
+     model = g.NodeRLS(n * r, g.Y_LEN, scale, ridge, forget, device)
+     step = 256 if n * r <= 24000 else 64
+-    for s in range(0, fit_n, step):
++    for s in (range(0, fit_n, step) if not zero_label else ()):          # e24-annual c: no fit, a fresh prior for the test stream
+         x, b, y, valid, _ = fn(slice(s, min(s + step, fit_n)))
+         model.fit(x, b, y, valid)
+     T, fn = e3.make_chunks(B, None, None, device, arms, [(test, 0, n_test)])
+@@ -308,6 +329,15 @@
+     started = time.time()
+     B = AnnualBundle(opt.bundle)
+     assert opt.seed in B.meta['seeds'], (opt.seed, B.meta['seeds'])
++    tr = B.z['raw_train']                                              # e24-annual c: the zero-label trigger (read only)
++    fit_first, fit_count = g.n_windows(tr) - min(e3.FIT_WINDOWS, g.n_windows(tr)), min(e3.FIT_WINDOWS, g.n_windows(tr))
++    if int(g.target_valid(g.clean_y(g.get_windows(tr, fit_first, fit_count)[1])).sum()) == 0:
++        fallback_scale = float(B.norm[B.year][1])                      # training-split input std of the year, as the 0C B path
++        assert np.isfinite(fallback_scale) and fallback_scale > 0, fallback_scale
++        B.zero_label = dict(window_start=int(fit_first), window_count=int(fit_count),
++                            mask='g28_common.target_valid(clean_y(y)): finite and non-zero', scale=fallback_scale,
++                            scale_source='meta norm[year].std: training-split input standard deviation (not a fitting-label statistic)')
++        e3.ZERO_LABEL = dict(scale=fallback_scale, source=B.zero_label['scale_source'])
+     cell = '%s/%d/s%d' % (B.meta['dataset'], B.year, opt.seed)
+     case = None
+     if opt.cases:
+@@ -366,6 +396,17 @@
+                   provenance=dict(host=socket.gethostname(), entry_output_root=os.environ.get('EVOST_VIRGA_OUT'), argv=sys.argv[1:]),
+                   device=str(device), gpu=torch.cuda.get_device_name(0) if device.type == 'cuda' else None, peak_gpu_gib=peak,
+                   torch=torch.__version__, numpy=np.__version__)
++    if B.zero_label is not None:                                       # e24-annual c: recorded only when the fallback ran
++        pairs = {}
++        for kind, (a, b) in (('uncalibrated', ('evost', 'same')), ('calibrated', ('evost', 'same'))):
++            ea, eb = main_result[a][kind]['strict'], main_result[b][kind]['strict']
++            both = [(x, y) for lab in LABELS for x, y in zip(ea[lab], eb[lab])]
++            diffs = [float(abs(x - y)) for x, y in both if np.isfinite(x) and np.isfinite(y)]
++            pairs[kind] = dict(max_abs_difference=max(diffs) if diffs else None, finite_pairs=len(diffs),
++                               nonfinite_mismatch=int(sum(bool(np.isfinite(x)) != bool(np.isfinite(y)) for x, y in both)))
++        record['zero_label_fallback'] = dict(B.zero_label, valid_fit_targets=0, identities='checkpoint (no candidate fit)',
++                                             rls='prior (theta=0, P=I/ridge, count=0) in selection, replay and test; no train-tail fit',
++                                             refresh_vs_frozen=pairs['uncalibrated'], evost_vs_frozen_rls=pairs['calibrated'])
+     g.save_json(out / 'e24_record.json', nan_to_none(record))
+     g.save_json(out / 'completed.json', dict(status='completed', cell_status=status, rows=len(rows), seconds=time.time() - started,
+                                              bounded_smoke=bool(opt.max_windows), mode=opt.mode, role=opt.role))
+--- runner_b/e3_confirm.py
++++ runner_c/e3_confirm.py
+@@ -25,6 +25,7 @@
+ 
+ RIDGES, FORGETS = (1., 100.), (1., .999, .995, .99)          # identical to g28 e1_topology
+ FIT_WINDOWS, SELECT_WINDOWS = 2048, 1024
++ZERO_LABEL = None    # e24-annual c: set by the runner to dict(scale=..., source=...); used only when the fitting window has no valid label
+ DELAY, CADENCE, BLOCK = 12, 64, 256
+ 
+ 
+@@ -165,13 +166,20 @@
+     select_n = min(SELECT_WINDOWS, n_val)
+     _, y_fit = g.get_windows(train, fit_piece[1], fit_n)
+     y_fit = g.clean_y(y_fit)
+-    scale = float(y_fit[g.target_valid(y_fit)].std())
++    zero_label = int(g.target_valid(y_fit).sum()) == 0                    # e24-annual c trigger (read only; CPU tensor)
++    if zero_label:
++        assert ZERO_LABEL is not None, 'no valid label in the fitting window and no fallback scale was set'
++        scale = ZERO_LABEL['scale']
++    else:
++        scale = float(y_fit[g.target_valid(y_fit)].std())
+     del y_fit
+ 
+     def fitted(arm_list, ridge, forget):
+         """One RLS state per virtual node (arm-major), fitted on the train tail."""
+         _, fn = make_chunks(B, weights, adj, device, arm_list, [fit_piece])
+         model = g.NodeRLS(n * len(arm_list), g.Y_LEN, scale, ridge, forget, device)
++        if zero_label:                                                     # e24-annual c: no fit, the prior (theta=0, P=I/ridge, count=0)
++            return model
+         step = 256 if n * len(arm_list) <= 24000 else 64
+         for s in range(0, fit_n, step):
+             x, b, y, valid, _ = fn(slice(s, min(s + step, fit_n)))
+@@ -262,9 +270,12 @@
+     sums['block_abs_cnt'] = np.diff(np.concatenate([np.zeros_like(cumulative[:1]), cumulative]), axis=0)
+     sums['arm_names'] = np.asarray([a['name'] for a in arms])
+     np.savez_compressed(out / 'e3_sums.npz', **sums)
+-    g.save_json(out / 'e3_selection.json', dict(selection=selection, scale=scale, fit_windows=int(fit_n),
+-                                                label_delay=DELAY, cadence=CADENCE, n_val=int(n_val), n_test=int(n_test),
+-                                                mask='all 12 targets finite and non-zero'))
++    selection_doc = dict(selection=selection, scale=scale, fit_windows=int(fit_n),
++                         label_delay=DELAY, cadence=CADENCE, n_val=int(n_val), n_test=int(n_test),
++                         mask='all 12 targets finite and non-zero')
++    if zero_label:                                                         # e24-annual c: recorded only when the fallback ran
++        selection_doc['zero_label_fallback'] = dict(ZERO_LABEL, valid_fit_targets=0, rls='prior (theta=0, P=I/ridge, count=0), no fit')
++    g.save_json(out / 'e3_selection.json', selection_doc)
+     return rows, arms, reference, dict(cohort_reference_year=ref_year if 'new' in cohorts else None, chunk=chunk,
+                                        select_seconds=select_seconds, stream_seconds=time.time() - began)
+ 

@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Median fitting costs in the primary STAEFormer maintenance experiment (36 H100 runs). Search time sums three learning-rate candidates. Times exclude calibration; GiB reports process memory during fitting.}
+\label{tab:cost}
+\begin{tabular}{lrrrr}
+\toprule
+Updated group & Values & s/epoch & Search (s) & GiB \\
+\midrule
+Identity refresh & 1.41M & 11.5 & 259 & 10.4 \\
+Full fine-tuning & 2.01M & 14.0 & 327 & 11.4 \\
+Shared weights & 0.60M & 13.7 & 334 & 11.6 \\
+Output head & 0.02M & 4.8 & 180 & 4.5 \\
+\bottomrule
+\end{tabular}
+\end{table}

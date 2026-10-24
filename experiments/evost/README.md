@@ -1,6 +1,6 @@
 # EvoST experiments
 
-These are the source snapshots used for identity maintenance and delayed-feedback experiments. The scientific Python code is preserved; a few docstrings replace a machine name with a generic reference. File hashes are recorded in [the release manifest](../../results/evost/manifest.json). The existing `a2tta_main.py`, baseline runners, and configurations remain available for the annual A²TTA benchmark.
+These are the source snapshots used for identity maintenance and delayed-feedback experiments. The scientific Python code is preserved; a few docstrings replace a machine name with a generic reference. File hashes are recorded in [the release manifest](../../results/evost/manifest.json). The annual-benchmark runner is in [annual/](annual/README.md) with its own manifest; the benchmark's baseline runners and configurations are described in the [baseline guide](../../docs/baselines.md).
 
 | Directory | Study | Main entry |
 |---|---|---|
@@ -14,6 +14,7 @@ These are the source snapshots used for identity maintenance and delayed-feedbac
 | `g40` | Scheduled refitting of new identities | `e18_handover.py` |
 | `g41` | Joint identity refitting and calibration restart | `e21_handover2.py` |
 | `g42` | EAC-style prompt and recent-data scratch controls | `e23_eac.py` |
+| `annual` | Annual benchmark: EvoST and matched controls on each year's checkpoint, ten networks | `e24_annual.py` |
 
 The final EvoST arrival branch is `g41/a_prof0_r`. Other branches are controls and diagnostic variants. Source comments retain the original study and rule identifiers.
 

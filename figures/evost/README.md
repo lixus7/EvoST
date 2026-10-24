@@ -18,4 +18,4 @@ python figures/evost/plot_graph_evo.py --out-dir outputs/graph_evolution
 
 The graph counts use each undirected edge once. Average degree is `2E/N` and density is `2E/[N(N-1)]`. The 213-point series contains 212 points reconstructed from cached adjacency counts and one D04/2001 point recovered from the archived vector figure, with `N=1266` and `E=385104`.
 
-Original A²TTA result-figure notebooks and renderers remain under [notebook/](../../notebook/README.md). The [extended experiments](../../docs/extended_experiments.md) link the full rendered figures.
+The annual-benchmark per-step figures are in [docs/assets](../../docs/assets) (`per_horizon_evost_controls_*`); their values are in [results/evost/annual/per_step.csv](../../results/evost/annual/README.md). The sensor-coverage maps are drawn by [figures/data/render_final.py](../data/README.md).

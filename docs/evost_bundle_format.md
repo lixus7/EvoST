@@ -21,6 +21,16 @@ Donor diagnostics also read the earlier year's bundle from the same `stae/` dire
 
 `g28_common.get_windows` preserves the original experiment's indexing: the number of windows is `T - 24`, window `i` takes rows `i:i+12` as input and `i+12:i+24` as targets. This convention intentionally matches the saved results, including the unused final possible window.
 
+## Annual benchmark bundles
+
+The [annual runner](../experiments/evost/annual/README.md) reads the same `g30-stae` layout with three differences:
+
+- `ckpt_years` is `[year]`: only the same-year checkpoint, identified by relative path and SHA-256 in the cases files, which the exporter checks before loading it.
+- `seeds` are the evaluation seeds 51–55, stored with the checkpoints of seeds 42–46.
+- `norm[year]` is computed by [`utils/window_stats.window_input_stats`](../utils/window_stats.py) over the year's training split, the same statistics with which validation and test inputs are standardized.
+
+`sensor_ids` may be empty for a year without a sensor-metadata snapshot; the same-year streams do not use sensor IDs. Reference forecasts are stored for graphs with at most 3,000 sensors and are compared with the standalone backbone at run time.
+
 ## STID and Graph WaveNet
 
 These drivers also use the raw splits and stable IDs in the STAEFormer bundle. Their `--ckpt` directory supplies architecture-specific per-year weights and metadata produced by [train_stid.py](../experiments/evost/g35/train_stid.py) or [train_gwn.py](../experiments/evost/g36/train_gwn.py). Those preparation scripts additionally take the training rows preceding the bundle's tail, along with a checksum that verifies the two portions belong together.

@@ -141,7 +141,7 @@ The intervals use 10,000 district bootstrap draws after averaging three seeds wi
     text+='## Complete study records\n\nThe saved summaries include calibrated and uncalibrated comparisons, established/new-sensor cohorts, and the additional diagnostic branches. Primary, secondary, and development settings keep their original labels.\n\n'
     for n,title in [(33,'Fixed-rate refresh and donors'),(34,'Districts and checkpoint ages'),(35,'STID'),(36,'Graph WaveNet'),(37,'Parameter groups'),(38,'History budgets and initialization'),(39,'Time-input sensitivity'),(40,'New-identity refitting'),(41,'Joint refitting'),(42,'Prompt and scratch controls')]:
         text+=f'- [{title}: summary](../results/evost/g{n}/summary.json) · [per-run records](../results/evost/g{n}/results_V)\n'
-    text+='\nThe [annual benchmark and extended appendix](extended_experiments.md) retain the complete A²TTA baseline comparisons under their original protocol.\n'
+    text+='\nThe [annual benchmark](evost_annual.md) reports EvoST and its matched controls on the same-year checkpoints of ten networks.\n'
     return text
 
 def main():

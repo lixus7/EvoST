@@ -14,7 +14,7 @@ baseline on the xxltraffic / PEMS continual-forecasting benchmark.
 > So you can skip step 1 below and go straight to the run.
 
 It is fully self-contained — it does **not** modify `main.py`, `stkec_main.py`,
-`a2tta_main.py`, `se_lewm_main.py`, `src/model/model.py`, or any existing config.
+`src/model/model.py`, or any existing config.
 
 ## New files
 

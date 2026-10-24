@@ -1,7 +1,7 @@
 """
 TimesFM zero-shot baseline for the xxltraffic / PEMS continual-forecasting benchmark.
 
-Standalone entry point — does NOT touch main.py / stkec_main.py / a2tta_main.py etc.
+Standalone entry point — does NOT touch main.py / stkec_main.py etc.
 It evaluates Google's TimesFM time-series foundation model in pure zero-shot mode
 (no training, no fine-tuning) on exactly the same per-year test windows used by all
 other baselines, and reports MAE / RMSE / MAPE at horizons 3/6/12 and Avg via the

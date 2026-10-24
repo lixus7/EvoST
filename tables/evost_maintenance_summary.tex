@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{Parameter maintenance on five-year-old STAEFormer checkpoints, with Scratch trained anew. Calibrated test H12 MAE relative to the calibrated target-year checkpoint (1.000); H12 accumulates steps 1--12. Geometric means over twelve settings after averaging three seeds per setting, with 95\% district-bootstrap intervals. Lower is better.}
+\label{tab:maintenance}
+\begin{tabular}{lrr}
+\toprule
+Variant & Ratio & 95\% interval \\
+\midrule
+Old & 1.177 & [1.166, 1.187] \\
+Head & 1.148 & [1.138, 1.158] \\
+Shared & 1.078 & [1.068, 1.089] \\
+Prompt & 1.130 & [1.122, 1.140] \\
+Scratch & 1.123 & [1.098, 1.141] \\
+EvoST & 1.025 & [1.015, 1.037] \\
+EvoST+Prompt & 1.023 & [1.014, 1.033] \\
+Full FT & 1.018 & [1.010, 1.027] \\
+\bottomrule
+\end{tabular}
+\end{table}

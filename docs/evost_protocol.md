@@ -21,7 +21,7 @@ The identity blocks are `12 × N × 80` in STAEFormer, `N × 32` in STID, and tw
 
 The main STAEFormer comparison uses the latest 2,048 training windows and reserves the final quarter for early stopping. Identity learning rates are selected from `{0.001, 0.003, 0.01}`. Fits run for at most 16 epochs with patience 3. Shared weights, shared temporal parameters, output layers, and normalization statistics remain frozen during identity-only maintenance; the model runs in evaluation mode. The full-parameter, shared-weight, output-head, and prompt controls have their own documented learning-rate grids in the source.
 
-The EAC-style prompt control uses a rank-six node prompt on the same frozen STAEFormer and recent observations. It tests the prompt mechanism under the maintenance protocol. The original EAC benchmark remains available in the [annual benchmark results](../tables/main_table.md).
+The EAC-style prompt control uses a rank-six node prompt on the same frozen STAEFormer and recent observations. It tests the prompt mechanism under the maintenance protocol. EAC itself is a baseline of the annual benchmark ([tables](../tables/README.md), [baseline guide](baselines.md)).
 
 ## Arrival and joint refitting
 

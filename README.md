@@ -1,74 +1,55 @@
 # EvoST: Adapting Traffic Forecasters to Evolving Sensor Graphs
 
-EvoST maintains spatio-temporal forecasters as traffic sensor networks evolve. It freezes shared weights, refreshes sensor identities using recent observations, and calibrates forecasts as delayed labels arrive. New sensors borrow identities from established sensors with similar traffic patterns; a later joint refit updates all identities and recalibrates their forecasts.
+EvoST maintains a deployed spatio-temporal forecaster while its sensor network evolves. It keeps the shared spatio-temporal weights of a checkpoint fixed and refreshes the node identities from released labels. New sensors borrow identities from behaviorally similar established sensors until a joint refit, and a per-sensor recursive least-squares (RLS) calibrator corrects forecasts as delayed feedback arrives.
 
 ![EvoST overview](docs/assets/fig2_01_blue_yellow_apricot.png)
 
-[Method and evaluation protocol](docs/evost_protocol.md) · [Results](docs/evost_results.md) · [Experiment code](experiments/evost/README.md) · [Extended appendix](docs/extended_experiments.md)
+**[Extended version of the paper (PDF)](paper/EvoST_extended.pdf)** · [Protocol](docs/evost_protocol.md) · [Maintenance results](docs/evost_results.md) · [Annual benchmark](docs/evost_annual.md) · [Baselines](docs/baselines.md) · [Data](data/README.md)
 
-## Results
+## Main results
 
-Across twelve PeMS region-year settings, identity refresh reduces the relative MAE gap over the one-hour forecast horizon between five-year-old STAEFormer checkpoints and calibrated target-year models from **17.7% to 2.5%**. It captures **95%** of the improvement achieved by full-parameter fine-tuning on the same recent data. The Graph WaveNet implementation recovers **88%** of its five-year MAE gap by refreshing the embeddings that define learned adjacency. STID and older STAEFormer checkpoints provide further evaluations.
+Numbers as reported in the paper; every one can be traced to the saved results in this repository.
 
-| Evidence | Read or reproduce |
-|---|---|
-| Parameter updates, prompt controls, and absolute errors | [EvoST results](docs/evost_results.md) |
-| New-sensor initialization and joint refitting | [Arrival results](docs/evost_results.md#sensor-arrival-and-joint-refitting) |
-| Per-run metrics, calibration selections, and summaries | [Saved measurements](results/evost) |
-| Complete original baseline comparisons | [Annual benchmark table](tables/main_table.md) |
-| Original newly added sensor comparisons | [New-sensor table](tables/tsas_new_sensors.md) |
-| Original main results, delay sweep, ablations, and cases | [Annual benchmark analysis](docs/annual_benchmark_analysis.md) |
-| Per-horizon curves, drift, cost, sensitivity, and case studies | [Extended experiments](docs/extended_experiments.md) |
-| Current figures and editable graph/age plots | [Figure assets](docs/assets) · [plot sources](figures/evost) |
+- **Which parameters need maintenance.** Twelve PeMS region-year settings are evaluated with test MAE over the one-hour horizon, all compared forecasters calibrated. Here five-year-old STAEFormer checkpoints are 17.7% worse than the target-year checkpoint.
+  - Refreshing only the node identities lowers the gap to 2.5%, recovering 86% of it. Its MAE is 0.7% above that of full fine-tuning on the same recent data.
+  - Tuning only the shared weights, the output head or an EAC-style input prompt, or training a model from scratch on the same windows, recovers much less.
+- **Older checkpoints and other backbones.** Similar recovery holds for STAEFormer checkpoints up to fifteen years old. On sixteen settings, refreshing STID and Graph WaveNet recovers 67% and 88% of their five-year gaps.
+- **Newly added sensors.** Borrowing identities at arrival and refitting all identities at stream window 1,024 leaves new sensors 3.6% and established sensors 0.3% above their references.
+- **Annual benchmark** (nine EvoXXLTraffic districts and TFNSW, a separate checkpoint for each year). EvoST has the lowest Avg MAE, RMSE and MAPE among the reported non-foundation methods on all ten networks.
+  - Relative to the same frozen checkpoints, it lowers Avg-MAE by 9.4% on average, of which the calibrator alone gives 8.7%.
+  - Identity refresh lowers Avg-MAE below that of the calibrator alone on every network, by 0.8% on average.
+  - Per step, EvoST is below the frozen checkpoints in 360 of 360 network-metric-step combinations and below the calibrated ones in 343.
 
-The annual benchmark uses the original A²TTA method, including its FiLM calibrator and local clone. Its complete baselines, results, and runnable entry points remain in this repository. EvoST's maintenance experiments use different checkpoint ages, seed counts, and observation budgets, described in the [protocol](docs/evost_protocol.md). Both studies define cumulative-horizon metrics explicitly.
+## Repository map
 
-## Paper and extended material
+| Path | Content | Paper |
+|---|---|---|
+| [experiments/evost/](experiments/evost/README.md) `g33`–`g42` | Identity maintenance, parameter-group controls, prompt and scratch controls, checkpoint ages, STID and Graph WaveNet, history budgets, sensor arrival and joint refitting | Sections 6.4–6.7, appendix |
+| [experiments/evost/annual/](experiments/evost/annual/README.md) | Annual-benchmark runner (EvoST and matched controls) with the 1,165 run definitions | Section 6.3, Tables 2 and 5 (11 in the extended version) |
+| [results/evost/](results/evost) | Per-run records and summaries of the maintenance experiments | |
+| [results/evost/annual/](results/evost/annual/README.md) | Per-run, per-step and summary results of the annual benchmark | |
+| [scripts/render_evost_results.py](scripts/render_evost_results.py), [scripts/render_annual_results.py](scripts/render_annual_results.py) | Rebuild or check the reported numbers from the saved results; no model execution | |
+| [tables/](tables/README.md) | LaTeX sources of the paper's tables | |
+| [figures/](figures/evost/README.md), [docs/assets/](docs/assets) | Plot scripts and rendered figures | |
+| `main.py`, `src/`, `conf/`, `*_main.py`, `scripts/*_run.sh` | Annual-benchmark baselines ([guide](docs/baselines.md)) | Table 2 |
+| [data/](data/README.md) | EvoXXLTraffic download, layout and processing | Section 3 |
+| [utils/window_stats.py](utils/window_stats.py) | Training-input statistics used to standardize EvoST inputs | |
 
-The WWW draft allocates space according to the claims each experiment supports. The conference allows eight main-text pages and twelve pages in total, including references and appendix. [WWW 2027 formatting requirements](https://www2027.thewebconf.org/research-track-papers/).
-
-| Location | Evidence retained |
-|---|---|
-| Main text | Absolute MAE for all twelve primary settings; matched parameter, prompt, and scratch controls; STID and Graph WaveNet; checkpoint ages; sensor arrival and joint refitting. |
-| PDF appendix | Additional horizons and RMSE; fitting and delayed-feedback details; history budgets and fitting costs; the original baseline table for three representative networks; graph statistics and extended related work. |
-| Online record | Complete ten-network baseline tables and horizon curves; annual new-sensor cohorts; the original A²TTA delay sweep, ablations, drift analyses, long-term checks, cases, and mechanism visualizations; source and per-run records. |
-
-The main text contains the evidence for EvoST's core claims. The online material preserves the complete experimental record, including the earlier output-adaptation results under their original names and protocols. Start with [EvoST results](docs/evost_results.md), [annual benchmark analysis](docs/annual_benchmark_analysis.md), or the [extended appendix](docs/extended_experiments.md).
-
-## Code and reproduction
-
-The new experiment source is under [`experiments/evost/`](experiments/evost). It contains identity maintenance for STAEFormer, STID, and Graph WaveNet; per-sensor RLS; sensor-arrival refitting; and the matched parameter, prompt, and scratch controls.
+## Quick checks (CPU, no data needed)
 
 ```bash
-# Read entry-point options.
-python experiments/evost/run.py --help
-
-# Small numerical and delayed-feedback checks on CPU.
+# RLS against batch ridge regression; future labels cannot change past forecasts
 python experiments/evost/selfcheck.py
 
-# Rebuild result documentation from committed metric records; no training.
-python scripts/render_evost_results.py
+# Maintenance results: verify the saved measurements and the results page
+python scripts/render_evost_results.py --check
+
+# Annual benchmark: recompute the ten-network tables and per-step counts from the per-run rows
+python scripts/render_annual_results.py --check
 ```
 
-The experiment modules need NumPy and PyTorch. The saved-result renderer needs NumPy; plot generation additionally needs Matplotlib. See the [experiment guide](experiments/evost/README.md) for full run commands and the [bundle format](docs/evost_bundle_format.md) for data and checkpoint inputs. Large maintenance bundles and checkpoints are not included in Git. Saved-result analysis is available directly from this checkout.
+The experiment modules need Python, NumPy and PyTorch; the annual check needs only the Python standard library. Full runs need the exported checkpoint bundles ([bundle format](docs/evost_bundle_format.md)); large bundles and checkpoints are not part of this repository. Run commands are in the [experiment guide](experiments/evost/README.md) and the [annual-benchmark guide](docs/evost_annual.md#run-a-network-year).
 
-The original benchmark retains its existing environment and commands:
+## License
 
-```bash
-conda env create -f environment.yaml
-conda activate stg
-```
-
-Use the [A²TTA and baseline guide](docs/a2tta.md) for the original pipeline. It covers static forecasters, continual methods, STRAP, ST-TTC, and the time-series foundation-model baselines. The existing `main.py`, `a2tta_main.py`, `src/`, `conf/`, and baseline scripts are preserved.
-
-## Data and supplementary details
-
-[EvoXXLTraffic data and downloads](data/README.md) · [data processing](data/processing/README.md) · [original figure notebooks](notebook/README.md).
-
-The [extended appendix](docs/extended_experiments.md) provides the full result tables, all-network horizon plots, sensor-cohort analyses, drift diagnostics, long-term checks, hyperparameter studies, and mechanism visualizations. The [LaTeX appendix and table sources](docs/paper_sources) and [bibliography](docs/paper_sources/references.bib) retain the detailed source material. The [EvoST protocol](docs/evost_protocol.md) specifies fitting windows, delayed feedback, arrival handling, and aggregation.
-
-## Acknowledgements and license
-
-The benchmark builds on TrafficStream, EAC, STKEC, PECPM, STRAP, ST-TTC, and the forecasting backbones and foundation models listed in the [original guide](docs/a2tta.md). Source comments preserve model provenance and implementation differences.
-
-[Apache-2.0 license](LICENSE).
+[Apache-2.0](LICENSE).

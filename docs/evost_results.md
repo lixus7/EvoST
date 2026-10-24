@@ -116,4 +116,4 @@ The saved summaries include calibrated and uncalibrated comparisons, established
 - [Joint refitting: summary](../results/evost/g41/summary.json) · [per-run records](../results/evost/g41/results_V)
 - [Prompt and scratch controls: summary](../results/evost/g42/summary.json) · [per-run records](../results/evost/g42/results_V)
 
-The [annual benchmark and extended appendix](extended_experiments.md) retain the complete A²TTA baseline comparisons under their original protocol.
+The [annual benchmark](evost_annual.md) reports EvoST and its matched controls on the same-year checkpoints of ten networks.
