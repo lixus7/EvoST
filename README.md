@@ -25,7 +25,7 @@ Numbers as reported in the paper; every one can be traced to the saved results i
 | Path | Content | Paper |
 |---|---|---|
 | [experiments/evost/](experiments/evost/README.md) `g33`–`g42` | Identity maintenance, parameter-group controls, prompt and scratch controls, checkpoint ages, STID and Graph WaveNet, history budgets, sensor arrival and joint refitting | Sections 6.4–6.9, appendix |
-| [experiments/evost/annual/](experiments/evost/annual/README.md) | Annual-benchmark runner (EvoST and matched controls) with the 1,165 run definitions | Section 6.3, Table 1 and Figure 8 (Table 1, Table 9 and Figure 11 in the extended version) |
+| [experiments/evost/annual/](experiments/evost/annual/README.md) | Annual-benchmark runner (EvoST and matched controls) with the 1,165 run definitions | Section 6.3, Table 1 and Figure 9 (Table 1, Table 9 and Figure 12 in the extended version) |
 | [results/evost/](results/evost) | Per-run records and summaries of the maintenance experiments | |
 | [results/evost/annual/](results/evost/annual/README.md) | Per-run, per-step and summary results of the annual benchmark | |
 | [scripts/render_evost_results.py](scripts/render_evost_results.py), [scripts/render_annual_results.py](scripts/render_annual_results.py) | Rebuild or check the reported numbers from the saved results; no model execution | |
