@@ -47,7 +47,7 @@ python experiments/evost/export_bundles.py annual --dataset PEMS03 --out bundles
 
 Bundles and checkpoints are large and are not stored in Git.
 
-The checkpoint-preparation scripts of the STID, Graph WaveNet and time-input studies ([train_stid.py](../experiments/evost/g35/train_stid.py), [train_gwn.py](../experiments/evost/g36/train_gwn.py), [train_stae.py](../experiments/evost/g39/train_stae.py)) also need training-prefix files (`<DATASET>_<year>_head.npz`) and their own configuration and reference files, which `export_bundles.py` does not write. The driver that recorded the case study's forecasts and some figure renderers are not included either. The committed metrics and figure data can be checked without these inputs.
+The checkpoint-preparation scripts of the STID, Graph WaveNet and time-input studies ([train_stid.py](../experiments/evost/stid/train_stid.py), [train_gwn.py](../experiments/evost/graph_wavenet/train_gwn.py), [train_stae.py](../experiments/evost/time_inputs/train_stae.py)) also need training-prefix files (`<DATASET>_<year>_head.npz`) and their own configuration and reference files, which `export_bundles.py` does not write. The driver that recorded the case study's forecasts and some figure renderers are not included either. The committed metrics and figure data can be checked without these inputs.
 
 ## Maintenance experiments
 
@@ -71,16 +71,16 @@ Section numbers of the main text are the same in the submitted and the extended 
 - **Settings and seeds.** The main panel is PEMS03, PEMS06, PEMS08, PEMS10, PEMS11 and PEMS12 in 2020 and 2025, with evaluation seeds 51, 52 and 53. Evaluation seed `s` uses checkpoint seed `s − 9`.
 - **Output directory.** `--out` must not exist yet. The drivers refuse to overwrite earlier results.
 - **Smoke runs.** `--max-windows N` limits each split to `N` windows for debugging and marks the outputs as a smoke test. Omit it for full runs.
-- **STID and Graph WaveNet.** Add `--ckpt DIR`. The directory holds the per-year weights `DIR/<DATASET>/<DATASET>_<year>_s<seed>.npz` written by [train_stid.py](../experiments/evost/g35/train_stid.py) or [train_gwn.py](../experiments/evost/g36/train_gwn.py). Graph WaveNet also reads the target year's adjacency from a `gcn/<DATASET>_<year>.npz` bundle next to the `stae/` directory.
+- **STID and Graph WaveNet.** Add `--ckpt DIR`. The directory holds the per-year weights `DIR/<DATASET>/<DATASET>_<year>_s<seed>.npz` written by [train_stid.py](../experiments/evost/stid/train_stid.py) or [train_gwn.py](../experiments/evost/graph_wavenet/train_gwn.py). Graph WaveNet also reads the target year's adjacency from a `gcn/<DATASET>_<year>.npz` bundle next to the `stae/` directory.
 - **Development switches.** Some modules read environment variables named `G3x_*`, such as `G37_ARMS`, to shorten development runs. Their defaults are the reported settings, so leave them unset.
 
 Five experiments are run through their own scripts. They take the arguments of `run.py` (`--bundle`, `--seed`, `--out`, `--device`):
 
-- the borrow-and-keep arm of the arrival study, `experiments/evost/g40/e18_handover.py`
-- the recalibration control of Section 6.5, which rebuilds every calibrator in the new-only refit, `experiments/evost/g41/e23_recalall.py`
-- the arrival runs with the calibrators' scale restricted to the targets the arrival masks allow (Appendix A.3), `experiments/evost/g41/e25_scale.py`, which also needs `--scale-rule full` or `--scale-rule arrival`. `experiments/evost/g41/scale_check.py --bundles DIR --out FILE` computes the two scales from the bundles.
-- the STAEFormer time-input study of Section 6.4, `experiments/evost/g39/e19_timeinput.py`, which also needs `--models DIR` with the per-year STAEFormer checkpoints that [train_stae.py](../experiments/evost/g39/train_stae.py) retrains with and without time inputs
-- the earlier fixed-rate refresh and donor comparisons, `experiments/evost/g33/e10_refresh.py`
+- the borrow-and-keep arm of the arrival study, `experiments/evost/new_sensor_refit/e18_handover.py`
+- the recalibration control of Section 6.5, which rebuilds every calibrator in the new-only refit, `experiments/evost/sensor_arrival/e23_recalall.py`
+- the arrival runs with the calibrators' scale restricted to the targets the arrival masks allow (Appendix A.3), `experiments/evost/sensor_arrival/e25_scale.py`, which also needs `--scale-rule full` or `--scale-rule arrival`. `experiments/evost/sensor_arrival/scale_check.py --bundles DIR --out FILE` computes the two scales from the bundles.
+- the STAEFormer time-input study of Section 6.4, `experiments/evost/time_inputs/e19_timeinput.py`, which also needs `--models DIR` with the per-year STAEFormer checkpoints that [train_stae.py](../experiments/evost/time_inputs/train_stae.py) retrains with and without time inputs
+- the earlier fixed-rate refresh and donor comparisons, `experiments/evost/refresh_and_donors/e10_refresh.py`
 
 ## Annual benchmark
 
@@ -115,18 +115,20 @@ Each run writes its metrics, the selected calibration settings, the identity-fit
 
 ## Source folders
 
-The study folders under `experiments/evost/` and `results/evost/` keep the identifiers under which the runs were made, so that the paths and SHA-256 hashes in [the release manifest](../results/evost/manifest.json) still match. `run.py` maps each study name to its folder:
+Each maintenance study has its source in `experiments/evost/<folder>/` and its records in `results/evost/<folder>/`. `run.py` maps each study name to its folder:
 
-| Folder | Study |
-|---|---|
-| `g33` | Fixed-rate identity refresh and donor comparisons |
-| `g34` | Further districts and checkpoint ages (`age`) |
-| `g35` | STID (`stid`) |
-| `g36` | Graph WaveNet (`gwn`) |
-| `g37` | Parameter groups (`maintenance`) |
-| `g38` | History budgets and new-sensor initialization (`budget`) |
-| `g39` | STAEFormer with time inputs |
-| `g40` | Scheduled refitting of new identities, including the borrow-and-keep arm of the arrival study |
-| `g41` | Joint refitting, the final arrival design (`arrival`), the recalibration control and the scale check |
-| `g42` | Prompt and scratch controls (`prompt`) |
-| `annual` | Annual benchmark |
+| Folder | Study | `run.py` name |
+|---|---|---|
+| `parameter_groups` | Parameter groups | `maintenance` |
+| `prompt_and_scratch` | Prompt and scratch controls | `prompt` |
+| `checkpoint_ages` | Further districts and checkpoint ages | `age` |
+| `stid` | STID | `stid` |
+| `graph_wavenet` | Graph WaveNet | `gwn` |
+| `time_inputs` | STAEFormer with time inputs | |
+| `new_sensor_refit` | Scheduled refitting of new identities, including the borrow-and-keep arm of the arrival study | |
+| `sensor_arrival` | Joint refitting, the final arrival design, the recalibration control and the scale check | `arrival` |
+| `history_budget` | History budgets and new-sensor initialization | `budget` |
+| `refresh_and_donors` | Fixed-rate identity refresh and donor comparisons | |
+| `annual` | Annual benchmark | |
+
+Each folder holds the source as it ran. Module names and source comments use the study numbers of the development record (g33 to g42), which [the experiments README](../experiments/evost/README.md#study-numbers-in-the-source) maps to these folders.

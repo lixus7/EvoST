@@ -17,7 +17,7 @@ The maintenance drivers consume NumPy `.npz` bundles loaded with `allow_pickle=F
 
 `ckpt_years` lists the target year first, followed by available older years. `norm` maps a year string to the mean and standard deviation computed from that year's training inputs. An unknown sensor receives the old checkpoint's mean identity as the starting table row. The evaluation seed is the key used for checkpoint arrays; the recorded STAEFormer export maps evaluation seeds 51–53 to checkpoint seeds 42–44.
 
-Donor diagnostics also read the earlier year's bundle from the same `stae/` directory. They compute historical profiles from its training tail and align its sensor IDs with the target year. Geographic controls and Graph WaveNet read the matching `gcn/DATASET_YEAR.npz` bundle next to `stae/`, using its `adj_norm` (the row-normalized adjacency) and sensor IDs. `export_bundles.py graph` writes these two arrays. [RefreshBundle](../experiments/evost/g37/e10_refresh.py) and [StaeBundle](../experiments/evost/g37/e5_stae.py) are the loaders that read these arrays. The sensor-arrival variants apply masking and refitting to these same raw arrays.
+Donor diagnostics also read the earlier year's bundle from the same `stae/` directory. They compute historical profiles from its training tail and align its sensor IDs with the target year. Geographic controls and Graph WaveNet read the matching `gcn/DATASET_YEAR.npz` bundle next to `stae/`, using its `adj_norm` (the row-normalized adjacency) and sensor IDs. `export_bundles.py graph` writes these two arrays. [RefreshBundle](../experiments/evost/parameter_groups/e10_refresh.py) and [StaeBundle](../experiments/evost/parameter_groups/e5_stae.py) are the loaders that read these arrays. The sensor-arrival variants apply masking and refitting to these same raw arrays.
 
 `g28_common.get_windows` preserves the original experiment's indexing: the number of windows is `T - 24`, window `i` takes rows `i:i+12` as input and `i+12:i+24` as targets. This convention intentionally matches the saved results, including the unused final possible window.
 
@@ -33,6 +33,6 @@ The [annual runner](../experiments/evost/annual/README.md) reads the same layout
 
 ## STID and Graph WaveNet
 
-These drivers also use the raw splits and stable IDs in the STAEFormer bundle. Their `--ckpt` directory supplies architecture-specific per-year weights and metadata produced by [train_stid.py](../experiments/evost/g35/train_stid.py) or [train_gwn.py](../experiments/evost/g36/train_gwn.py). Those preparation scripts additionally take the training rows preceding the bundle's tail, along with a checksum that verifies the two portions belong together.
+These drivers also use the raw splits and stable IDs in the STAEFormer bundle. Their `--ckpt` directory supplies architecture-specific per-year weights and metadata produced by [train_stid.py](../experiments/evost/stid/train_stid.py) or [train_gwn.py](../experiments/evost/graph_wavenet/train_gwn.py). Those preparation scripts additionally take the training rows preceding the bundle's tail, along with a checksum that verifies the two portions belong together.
 
 The public benchmark download links are listed in [data/README.md](../data/README.md). They provide the data, not the bundles or checkpoints, which are large and are exported locally as described above.

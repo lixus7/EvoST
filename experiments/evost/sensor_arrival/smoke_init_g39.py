@@ -3,15 +3,15 @@ comparison between GPU types. Writes only the --out file.
 
   python smoke_init_g39.py --dataset PEMS05 --variant tm --year 2025 --head HEAD_DIR --bundles BUNDLE_DIR --conf stae_conf.json --out OUT.json [--seed 42] [--steps 20]
 
-Why: the first smoke (virga_g39.py) compared the validation error after one epoch of training with nitro's, tolerance 5%. On
-virga's H100 it differed by 1.0% without and by 9.5% with time inputs while data, environment and code hashes agreed:
+Why: the first smoke compared the validation error after one epoch of training with the development machine's, tolerance 5%. On
+the cluster's H100 it differed by 1.0% without and by 9.5% with time inputs while data, environment and code hashes agreed:
 training amplifies the rounding differences between GPU types. What an untrained model computes does not. This script runs
 train_stae.train_one unchanged and stops it after its --steps-th update; on the way it records
   - checksums (float64 sums on the CPU) of the initial parameters and of the normalised train / validation inputs and their
     time of day / day of week: model construction, initialisation, data, normalisation and calendar, exact on any device;
   - the validation loss of the untrained model, by train_stae.validation_loss just before the first update;
   - the training loss of every update up to --steps (the first is the loss of the untrained model on the first batch).
-The revised entry (virga_g39b.py) compares the checksums, the untrained validation loss and the first loss with nitro's; the
+The revised entry compares the checksums, the untrained validation loss and the first loss with the development machine's; the
 later losses are reported to show how fast two GPUs part.
 """
 import argparse

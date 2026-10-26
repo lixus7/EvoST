@@ -91,14 +91,14 @@ def sensitivity():
 
 def budget():
     s = 'budget'
-    sys.path.insert(0, str(ROOT / 'experiments' / 'evost' / 'g38'))
+    sys.path.insert(0, str(ROOT / 'experiments' / 'evost' / 'history_budget'))
     import analyze_g29 as A
     import analyze_g38 as G
     pairs = collections.OrderedDict([('stale5o / same', ('stale5o', 'same')), ('fit_emb / same', ('fit_emb', 'same')),
                                      ('fit_emb / stale5o', ('fit_emb', 'stale5o'))])
     gm = {}
     for b in (64, 1024, 2048):
-        files = sorted((RES / 'g38' / 'results_V').glob('bud-*/*/seed*/b%d/e3_metrics.jsonl' % b))
+        files = sorted((RES / 'history_budget' / 'runs').glob('bud-*/*/seed*/b%d/e3_metrics.jsonl' % b))
         per = G.load_runs(files)
         ok, missing = G.complete(per, G.PRIMARY, ('same', 'stale5o', 'fit_emb'))
         assert not missing and len(ok) == 12, (b, missing)
@@ -233,7 +233,7 @@ def arrival_recal():
     s = 'arrival-recal'
     sys.path.insert(0, str(ROOT / 'scripts'))
     import render_evost_results as R
-    data = load_records(RES / 'g41' / 'recal_V', 'hnd-')
+    data = load_records(RES / 'sensor_arrival' / 'recalibration_control', 'hnd-')
     r = R.ratio(data, 'r_prof0_r', reference='konly', cohort='old')
     claim(s, 'established sensors, new-only refit with every calibrator rebuilt, above reference (%)', '0.9', 100 * (r['gm'] - 1), '{:.1f}')
     a = R.ratio(data, 'a_prof0_r', reference='r_prof0_r', cohort='old')
@@ -246,7 +246,7 @@ def arrival_recal():
 
 def arrival_scale():
     s = 'arrival-scale'
-    table = json.loads((RES / 'g41' / 'scale_check.json').read_text())
+    table = json.loads((RES / 'sensor_arrival' / 'scale_check.json').read_text())
     ratios = {r['setting']: r['legal_over_all'] for r in table}
     claim(s, 'change of s when restricted to the targets the masks allow (%)', '-3.4 to +8.9',
           (100 * (min(ratios.values()) - 1), 100 * (max(ratios.values()) - 1)), lambda v: '%.1f to %+.1f' % v)
@@ -263,14 +263,14 @@ def arrival_scale():
     for name in rule:
         for ds, year in settings:
             for seed in seeds:
-                d = RES / 'g41' / 'scale_V' / ('scl-%s-%d-s%d-%s' % (ds, year, seed, name)) / ('%s_%d' % (ds, year)) / ('seed%d' % seed)
+                d = RES / 'sensor_arrival' / 'scale_check_runs' / ('scl-%s-%d-s%d-%s' % (ds, year, seed, name)) / ('%s_%d' % (ds, year)) / ('seed%d' % seed)
                 rows = [json.loads(line) for line in (d / 'e3_metrics.jsonl').read_text().splitlines()]
                 rule[name].setdefault((ds, year), {})[seed] = {(r['arm'], r['portion'], r['cohort']): r for r in rows}
                 chosen[name][(ds, year, seed)] = {a: (v['chosen']['ridge'], v['chosen']['forget'])
                                                   for a, v in json.loads((d / 'e3_selection.json').read_text())['selection'].items()}
     claim(s, 'selected calibration settings under the restricted scale', 'unchanged', chosen['full'] == chosen['arrival'],
           lambda v: 'unchanged' if v else 'changed')
-    ref = load_records(RES / 'g41' / 'results_V', 'hnd-')
+    ref = load_records(RES / 'sensor_arrival' / 'runs', 'hnd-')
     def value(runs, arm, cohort):
         return sum(runs[seed][(arm, 'test', cohort)]['calibrated']['H12_MAE'] for seed in seeds) / len(seeds)
     worst_setting = worst_mean = 0.
@@ -283,10 +283,10 @@ def arrival_scale():
                 worst_setting = max(worst_setting, abs(change))
                 factor *= (1 + change) ** (1 / 12)
             worst_mean = max(worst_mean, abs(factor - 1))
-    full_equals_g41 = all(rule['full'][k][seed][(arm, 'test', c)]['calibrated']['H12_MAE'] == ref[(*k, arm, c)][seed]['calibrated']['H12_MAE']
+    full_equals_arrival = all(rule['full'][k][seed][(arm, 'test', c)]['calibrated']['H12_MAE'] == ref[(*k, arm, c)][seed]['calibrated']['H12_MAE']
                           for k in settings for seed in seeds for arm in ('same', 'konly', 'c64_prof0', 's_prof0_r', 'a_prof0_r')
                           for c in ('all', 'old', 'new'))
-    claim(s, 'runs with the original scale reproduce the arrival records', 'yes', full_equals_g41, lambda v: 'yes' if v else 'no')
+    claim(s, 'runs with the original scale reproduce the arrival records', 'yes', full_equals_arrival, lambda v: 'yes' if v else 'no')
     claim(s, 'largest change of a per-setting ratio (%)', '0.034', 100 * worst_setting, '{:.3f}')
     claim(s, 'largest change of a twelve-setting geometric mean (%)', 'below 0.01', 100 * worst_mean, below(0.01))
 

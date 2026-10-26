@@ -8,7 +8,10 @@ import statistics
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'experiments/evost/g37'))
+sys.path.insert(0, str(ROOT / 'experiments/evost/parameter_groups'))
+# Study folders, keyed by the study numbers used in the source comments (g33-g42 in the development record).
+FOLDER = {33: 'refresh_and_donors', 34: 'checkpoint_ages', 35: 'stid', 36: 'graph_wavenet', 37: 'parameter_groups',
+          38: 'history_budget', 39: 'time_inputs', 40: 'new_sensor_refit', 41: 'sensor_arrival', 42: 'prompt_and_scratch'}
 import analyze_g29 as aggregate
 
 REGIONS = ('PEMS03', 'PEMS06', 'PEMS08', 'PEMS10', 'PEMS11', 'PEMS12')
@@ -19,11 +22,11 @@ ARMS = [('Old checkpoint',37,'stale5o'), ('Output head',37,'fit_head'),
         ('Identities + prompt',42,'fit_emb_prompt'), ('All parameters',37,'fit_all')]
 
 def summary(n):
-    return json.loads((ROOT / f'results/evost/g{n}/summary.json').read_text())
+    return json.loads((ROOT / f'results/evost/{FOLDER[n]}/summary.json').read_text())
 
 def load(n, prefix=''):
     data = collections.defaultdict(dict)
-    for path in sorted((ROOT / f'results/evost/g{n}/results_V').glob(prefix+'*/**/e3_metrics.jsonl')):
+    for path in sorted((ROOT / f'results/evost/{FOLDER[n]}/runs').glob(prefix+'*/**/e3_metrics.jsonl')):
         done = json.loads(path.with_name('completed.json').read_text())
         assert done['status'] == 'completed' and not done.get('bounded_smoke'), path
         for line in path.read_text().splitlines():
@@ -53,7 +56,7 @@ def table(headers, rows):
 
 def verify_horizon_sums(n, data):
     count=0
-    for line in (ROOT/f'results/evost/g{n}/horizon_sums.jsonl').read_text().splitlines():
+    for line in (ROOT/f'results/evost/{FOLDER[n]}/horizon_sums.jsonl').read_text().splitlines():
         r=json.loads(line)
         metric=data[(r['dataset'],r['year'],r['arm'],r['cohort'])][r['seed']]
         for kind in ('calibrated','uncalibrated'):
@@ -140,7 +143,7 @@ The intervals use 10,000 district bootstrap draws after averaging three seeds wi
     text+=table(['Updated group','Trainable values','Seconds/epoch','Search seconds','Peak GiB'],rows)
     text+='## Complete study records\n\nThe saved summaries include calibrated and uncalibrated comparisons, established/new-sensor cohorts, and the additional diagnostic branches. Primary, secondary, and development settings keep their original labels.\n\n'
     for n,title in [(33,'Fixed-rate refresh and donors'),(34,'Districts and checkpoint ages'),(35,'STID'),(36,'Graph WaveNet'),(37,'Parameter groups'),(38,'History budgets and initialization'),(39,'Time-input sensitivity'),(40,'New-identity refitting'),(41,'Joint refitting'),(42,'Prompt and scratch controls')]:
-        text+=f'- [{title}: summary](../results/evost/g{n}/summary.json) · [per-run records](../results/evost/g{n}/results_V)\n'
+        text+=f'- [{title}: summary](../results/evost/{FOLDER[n]}/summary.json) · [per-run records](../results/evost/{FOLDER[n]}/runs)\n'
     text+='\nThe [annual benchmark](evost_annual.md) reports EvoST and its matched controls on the same-year checkpoints of ten networks.\n'
     return text
 

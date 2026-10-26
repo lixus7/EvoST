@@ -1,8 +1,8 @@
 """Read-only: the arrival experiments' shared calibrator scale s as computed by e3_confirm.run (all sensors, full
 training tail) against the same statistic restricted to what the arrival scenario may see.
 
-Usage: python experiments/evost/g41/scale_check.py --bundles bundles/stae --out scale_check.json
-The twelve main-panel maintenance bundles are read; results/evost/g41/scale_check.json is the output for the paper's bundles.
+Usage: python experiments/evost/sensor_arrival/scale_check.py --bundles bundles/stae --out scale_check.json
+The twelve main-panel maintenance bundles are read; results/evost/sensor_arrival/scale_check.json is the output for the paper's bundles.
 """
 import argparse, json, sys
 from pathlib import Path

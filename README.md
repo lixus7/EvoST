@@ -52,21 +52,21 @@ Main-section numbers are the same in the submitted and the extended paper. Appen
 
 | Paper | Experiment | Command | Saved results |
 |---|---|---|---|
-| Section 6.3, Figure 3 | Which parameters need maintenance | `run.py maintenance`, `run.py prompt` | [g37](results/evost/g37), [g42](results/evost/g42) |
-| Section 6.3 [and Table 10] | Sensors the old checkpoint knows and unseen ones | `run.py maintenance` | [g37](results/evost/g37) |
-| Section 6.4, Table 2 | Other backbones | `run.py stid`, `run.py gwn` | [g35](results/evost/g35), [g36](results/evost/g36), STAEFormer row in [g34](results/evost/g34) |
-| Section 6.4, Figure 6(d) | Checkpoint ages | `run.py age` | [g34](results/evost/g34) |
-| Section 6.4, Appendix A.3 [A.5] | STAEFormer with time inputs | `g39/e19_timeinput.py` | [g39](results/evost/g39) |
-| Section 6.5, Figure 13 [Figure 4] | Sensor arrival, joint refitting and the recalibration control | `run.py arrival`, `g41/e23_recalall.py` | [g40](results/evost/g40), [g41](results/evost/g41) |
+| Section 6.3, Figure 3 | Which parameters need maintenance | `run.py maintenance`, `run.py prompt` | [parameter_groups](results/evost/parameter_groups), [prompt_and_scratch](results/evost/prompt_and_scratch) |
+| Section 6.3 [and Table 10] | Sensors the old checkpoint knows and unseen ones | `run.py maintenance` | [parameter_groups](results/evost/parameter_groups) |
+| Section 6.4, Table 2 | Other backbones | `run.py stid`, `run.py gwn` | [stid](results/evost/stid), [graph_wavenet](results/evost/graph_wavenet), STAEFormer row in [checkpoint_ages](results/evost/checkpoint_ages) |
+| Section 6.4, Figure 6(d) | Checkpoint ages | `run.py age` | [checkpoint_ages](results/evost/checkpoint_ages) |
+| Section 6.4, Appendix A.3 [A.5] | STAEFormer with time inputs | `time_inputs/e19_timeinput.py` | [time_inputs](results/evost/time_inputs) |
+| Section 6.5, Figure 13 [Figure 4] | Sensor arrival, joint refitting and the recalibration control | `run.py arrival`, `sensor_arrival/e23_recalall.py` | [new_sensor_refit](results/evost/new_sensor_refit), [sensor_arrival](results/evost/sensor_arrival) |
 | Section 6.6, Table 1, Figures 4, 10 and 11 [Tables 1, 5–9, Figures 5, 7, 12 and 13] | Annual benchmark, including newly added sensors | `annual/e24_annual.py` and the [baselines](docs/baselines.md) | [annual](results/evost/annual/README.md) |
-| Section 6.7, Figure 5 [Figure 8] | Ablation: (a) annual benchmark, (b) parameter study, (c) sensor arrival | as above | as above, and [g38](results/evost/g38) |
+| Section 6.7, Figure 5 [Figure 8] | Ablation: (a) annual benchmark, (b) parameter study, (c) sensor arrival | as above | as above, and [history_budget](results/evost/history_budget) |
 | Section 6.8, Figure 6(a, b) | Calibrator settings and identity learning rates of the annual runs | `annual/e24_annual.py` | [annual](results/evost/annual/README.md) |
-| Section 6.8, Figure 6(c) [and Table 3] | History budget | `run.py budget` | [g38](results/evost/g38) |
+| Section 6.8, Figure 6(c) [and Table 3] | History budget | `run.py budget` | [history_budget](results/evost/history_budget) |
 | Section 6.9, Figure 7 [Figure 9] | Case study | `run.py maintenance` for panel (a); saved forecast traces for panel (b) | [case_study](results/evost/case_study/README.md) |
-| Figure 12 [Figure 14] | Fitting cost | `run.py maintenance` | [g37](results/evost/g37) |
-| Appendix A.3 [A.5] | Calibrator scale in the arrival runs | `g41/e25_scale.py`, `g41/scale_check.py` | [g41](results/evost/g41) |
+| Figure 12 [Figure 14] | Fitting cost | `run.py maintenance` | [parameter_groups](results/evost/parameter_groups) |
+| Appendix A.3 [A.5] | Calibrator scale in the arrival runs | `sensor_arrival/e25_scale.py`, `sensor_arrival/scale_check.py` | [sensor_arrival](results/evost/sensor_arrival) |
 
-Commands are relative to `experiments/evost/`. The folder names `g33`–`g42` are the identifiers under which the runs were made. They are kept so that the recorded file hashes still match ([details](experiments/evost/README.md)). [docs/evost_results.md](docs/evost_results.md) and [docs/evost_annual.md](docs/evost_annual.md) report the main comparisons, and `scripts/check_paper_numbers.py` checks the numbers the paper quotes from the other results in this table.
+Commands are relative to `experiments/evost/`. [docs/evost_results.md](docs/evost_results.md) and [docs/evost_annual.md](docs/evost_annual.md) report the main comparisons, and `scripts/check_paper_numbers.py` checks the numbers the paper quotes from the other results in this table.
 
 ## Main results
 

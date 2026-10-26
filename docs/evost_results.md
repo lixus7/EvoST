@@ -105,15 +105,15 @@ Median costs from the primary STAEFormer maintenance study on H100 runs. Search 
 
 The saved summaries include calibrated and uncalibrated comparisons, established/new-sensor cohorts, and the additional diagnostic branches. Primary, secondary, and development settings keep their original labels.
 
-- [Fixed-rate refresh and donors: summary](../results/evost/g33/summary.json) · [per-run records](../results/evost/g33/results_V)
-- [Districts and checkpoint ages: summary](../results/evost/g34/summary.json) · [per-run records](../results/evost/g34/results_V)
-- [STID: summary](../results/evost/g35/summary.json) · [per-run records](../results/evost/g35/results_V)
-- [Graph WaveNet: summary](../results/evost/g36/summary.json) · [per-run records](../results/evost/g36/results_V)
-- [Parameter groups: summary](../results/evost/g37/summary.json) · [per-run records](../results/evost/g37/results_V)
-- [History budgets and initialization: summary](../results/evost/g38/summary.json) · [per-run records](../results/evost/g38/results_V)
-- [Time-input sensitivity: summary](../results/evost/g39/summary.json) · [per-run records](../results/evost/g39/results_V)
-- [New-identity refitting: summary](../results/evost/g40/summary.json) · [per-run records](../results/evost/g40/results_V)
-- [Joint refitting: summary](../results/evost/g41/summary.json) · [per-run records](../results/evost/g41/results_V)
-- [Prompt and scratch controls: summary](../results/evost/g42/summary.json) · [per-run records](../results/evost/g42/results_V)
+- [Fixed-rate refresh and donors: summary](../results/evost/refresh_and_donors/summary.json) · [per-run records](../results/evost/refresh_and_donors/runs)
+- [Districts and checkpoint ages: summary](../results/evost/checkpoint_ages/summary.json) · [per-run records](../results/evost/checkpoint_ages/runs)
+- [STID: summary](../results/evost/stid/summary.json) · [per-run records](../results/evost/stid/runs)
+- [Graph WaveNet: summary](../results/evost/graph_wavenet/summary.json) · [per-run records](../results/evost/graph_wavenet/runs)
+- [Parameter groups: summary](../results/evost/parameter_groups/summary.json) · [per-run records](../results/evost/parameter_groups/runs)
+- [History budgets and initialization: summary](../results/evost/history_budget/summary.json) · [per-run records](../results/evost/history_budget/runs)
+- [Time-input sensitivity: summary](../results/evost/time_inputs/summary.json) · [per-run records](../results/evost/time_inputs/runs)
+- [New-identity refitting: summary](../results/evost/new_sensor_refit/summary.json) · [per-run records](../results/evost/new_sensor_refit/runs)
+- [Joint refitting: summary](../results/evost/sensor_arrival/summary.json) · [per-run records](../results/evost/sensor_arrival/runs)
+- [Prompt and scratch controls: summary](../results/evost/prompt_and_scratch/summary.json) · [per-run records](../results/evost/prompt_and_scratch/runs)
 
 The [annual benchmark](evost_annual.md) reports EvoST and its matched controls on the same-year checkpoints of ten networks.

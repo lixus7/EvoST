@@ -13,7 +13,7 @@ Source of the annual EvoST runs: EvoST and its matched controls on each year's S
 | `runner_b_to_c.diff` | Difference between runner b (1,160 runs) and runner c (the five PEMS06/2005 runs with the zero-label fallback) |
 | `MANIFEST.json` | SHA-256 of every file and of its source; the only edits are a machine name in two comments of `e5_stae.py` and neutral cluster labels in the cases files |
 
-The modules other than `e24_annual.py` and `e3_confirm.py` are the same as in the maintenance experiments (`../g37`, `../g42`). The files here are runner c; applying `runner_b_to_c.diff` in reverse gives runner b.
+The modules other than `e24_annual.py` and `e3_confirm.py` are the same as in the maintenance experiments (`../parameter_groups`, `../prompt_and_scratch`). The files here are runner c; applying `runner_b_to_c.diff` in reverse gives runner b.
 
 ## Usage
 

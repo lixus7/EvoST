@@ -2,7 +2,7 @@
 
   python analyze_g32.py RESULT_ROOT [--family gcn|stae|gcno] [--g29 G29_RESULT_ROOT]
 
-RESULT_ROOT holds .../<dataset>_<year>/seed<seed>/e3_metrics.jsonl (the virga layout results_V/rra-<family>-<dataset>-<year>/...
+RESULT_ROOT holds .../<dataset>_<year>/seed<seed>/e3_metrics.jsonl (the cluster layout results_V/rra-<family>-<dataset>-<year>/...
 or the development layout). Endpoint: test-portion H12 MAE, mean of seeds 51-53; geometric means with the g29 bootstrap over
 districts. Rules: G = rra/base, S = rra/self, R = rra/rand, F = rra/fixed, P = geo/rand, each "holds" if the upper CI bound is
 below 1; a graph component can be claimed only if S and R hold and the geometric mean of S is at most 0.99.

@@ -27,7 +27,7 @@ The EAC-style prompt control uses a rank-six node prompt on the same frozen STAE
 
 The initial identity is the mean of five behaviorally similar established-sensor identities. Matching uses finite raw observations, including zeros. A donor must have observations at 20% of the available times and overlap with the incoming sensor at 20% of those times. If fewer than five donors qualify, the complete five-donor set is sampled from established sensors with the run's fixed seed.
 
-In the code, the final arrival configuration is the branch `a_prof0_r` of [e21_handover2.py](../experiments/evost/g41/e21_handover2.py). At zero-based stream index 1,024, it refits every identity and restarts every sensor's RLS calibrator. With a 12-step label delay, stream windows 0 through 1,012 are available. These 1,013 windows and the last 11 eligible post-arrival prestream windows form the 1,024-window refit pool. The event follows that step's RLS update and precedes its forecast. Arrival fits use learning rate 0.003.
+In the code, the final arrival configuration is the branch `a_prof0_r` of [e21_handover2.py](../experiments/evost/sensor_arrival/e21_handover2.py). At zero-based stream index 1,024, it refits every identity and restarts every sensor's RLS calibrator. With a 12-step label delay, stream windows 0 through 1,012 are available. These 1,013 windows and the last 11 eligible post-arrival prestream windows form the 1,024-window refit pool. The event follows that step's RLS update and precedes its forecast. Arrival fits use learning rate 0.003.
 
 ## Delayed feedback and calibration
 
@@ -47,6 +47,6 @@ All ratios identify their reference. The maintenance comparison uses a calibrate
 
 ## Backbone implementations
 
-These experiments use the repository's backbone implementations. The Graph WaveNet variant has two temporal blocks and blends learned and static adjacency. The initial STID implementation uses node embeddings without timestamp embeddings. A separate STAEFormer time-input study is included ([e19_timeinput.py](../experiments/evost/g39/e19_timeinput.py)). Model definitions, checkpoint preparation helpers, and numerical equivalence checks are included with the experiment source.
+These experiments use the repository's backbone implementations. The Graph WaveNet variant has two temporal blocks and blends learned and static adjacency. The initial STID implementation uses node embeddings without timestamp embeddings. A separate STAEFormer time-input study is included ([e19_timeinput.py](../experiments/evost/time_inputs/e19_timeinput.py)). Model definitions, checkpoint preparation helpers, and numerical equivalence checks are included with the experiment source.
 
 The source folders keep the identifiers under which the runs were made, so that the saved results stay traceable. [The experiment guide](../experiments/evost/README.md) maps each folder to its study, and [Running EvoST](run_evost.md) gives the commands. [The results page](evost_results.md) reports the main comparisons.

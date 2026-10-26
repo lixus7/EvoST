@@ -4,13 +4,13 @@ import runpy
 import sys
 
 ENTRIES = {
-    'maintenance': ('g37', 'e15_maintain.py'),
-    'prompt': ('g42', 'e23_eac.py'),
-    'arrival': ('g41', 'e21_handover2.py'),
-    'age': ('g34', 'e11_ages.py'),
-    'stid': ('g35', 'e13_stid.py'),
-    'gwn': ('g36', 'e14_gwn.py'),
-    'budget': ('g38', 'e16_budget.py'),
+    'maintenance': ('parameter_groups', 'e15_maintain.py'),
+    'prompt': ('prompt_and_scratch', 'e23_eac.py'),
+    'arrival': ('sensor_arrival', 'e21_handover2.py'),
+    'age': ('checkpoint_ages', 'e11_ages.py'),
+    'stid': ('stid', 'e13_stid.py'),
+    'gwn': ('graph_wavenet', 'e14_gwn.py'),
+    'budget': ('history_budget', 'e16_budget.py'),
 }
 
 def main():

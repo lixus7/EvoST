@@ -4,7 +4,7 @@ import sys
 import torch
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / 'g37'))
+sys.path.insert(0, str(Path(__file__).resolve().parent / 'parameter_groups'))
 import g28_common as g
 
 def main():
