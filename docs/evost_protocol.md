@@ -2,9 +2,9 @@
 
 EvoST maintains a forecaster by refreshing its sensor identities while freezing shared spatio-temporal weights. A per-sensor recursive least-squares (RLS) calibrator adjusts the forecasts when labels become available. New sensors borrow identities from established sensors with similar recent observations. A scheduled refit updates all identities and reinitializes all calibrators after sufficient feedback has accumulated.
 
-![EvoST method](assets/fig2_01_blue_yellow_apricot.png)
+![EvoST method](assets/evost_method.png)
 
-[Vector method figure](assets/fig2_01_blue_yellow_apricot.pdf).
+[Vector method figure](assets/evost_method.pdf).
 
 ## Two evaluation settings
 

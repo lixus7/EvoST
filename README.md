@@ -2,7 +2,7 @@
 
 EvoST maintains a deployed spatio-temporal forecaster while its sensor network evolves. It keeps the shared spatio-temporal weights of a checkpoint fixed and refreshes the node identities from released labels. New sensors borrow identities from behaviorally similar established sensors until a joint refit, and a per-sensor recursive least-squares (RLS) calibrator corrects forecasts as delayed feedback arrives.
 
-![EvoST overview](docs/assets/fig2_01_blue_yellow_apricot.png)
+![EvoST overview](docs/assets/evost_method.png)
 
 **[Extended version of the paper (PDF)](paper/EvoST_extended.pdf)** · [Protocol](docs/evost_protocol.md) · [Maintenance results](docs/evost_results.md) · [Annual benchmark](docs/evost_annual.md) · [Baselines](docs/baselines.md) · [Data](data/README.md)
 

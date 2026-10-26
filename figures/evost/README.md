@@ -3,11 +3,11 @@
 | Figure | Editable source | Current PDF |
 |---|---|---|
 | Introduction, green palette | [H7_www_green.pptx](H7_www_green.pptx) | [H_fig1.pdf](../../docs/assets/H_fig1.pdf) |
-| Method, blue/yellow/apricot palette | [fig2_01_blue_yellow_apricot.pptx](fig2_01_blue_yellow_apricot.pptx) | [method PDF](../../docs/assets/fig2_01_blue_yellow_apricot.pdf) |
+| Method (Figure 2), one module per subsection of Section 5 | [evost_method.pptx](evost_method.pptx) | [method PDF](../../docs/assets/evost_method.pdf) |
 | Checkpoint age | [plot script](plot_checkpoint_age.py), [values](checkpoint_age.json) | [age PDF](../../docs/assets/evost_checkpoint_age.pdf) |
 | Sensor graph evolution | [plot script](plot_graph_evo.py), [integer counts](graph/graph_statistics.csv) | [graph PDF](../../docs/assets/fig_graph_evo.pdf) |
 
-The presentation files contain editable native shapes and text. Their file names retain the original drawing identifiers. In the paper, Figure 2 is the methodology illustration; the dataset overview is Figure 8 of the submission (Figure 10 of the extended version).
+The presentation files contain editable native shapes and text. The introduction file keeps its original drawing identifier. In the paper, Figure 2 is the methodology illustration; the dataset overview is Figure 8 of the submission (Figure 10 of the extended version).
 
 Run the two numerical plot scripts from the repository root:
 
