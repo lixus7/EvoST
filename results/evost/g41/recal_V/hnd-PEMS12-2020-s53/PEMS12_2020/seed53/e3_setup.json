@@ -1,0 +1,91 @@
+{
+  "dataset": "PEMS12",
+  "year": 2020,
+  "seed": 53,
+  "nodes": 2420,
+  "layout": "g29",
+  "checkpoint_years": [
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "konly",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "konly"
+    },
+    {
+      "name": "s_prof0_r",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "s:prof0",
+      "history": 64,
+      "restart": true
+    },
+    {
+      "name": "a_prof0_r",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "sa:prof0",
+      "history": 64,
+      "restart": true
+    },
+    {
+      "name": "r_prof0_r",
+      "base": "stae",
+      "ckpt": 2015,
+      "norm": 2015,
+      "age": 5,
+      "variant": "sr:prof0",
+      "history": 64,
+      "restart": true
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.00054931640625,
+      "reference_abs_max": 778.619873046875,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2020": [
+      120.32911965078047,
+      170.36126642269602
+    ],
+    "2015": [
+      114.64148801470981,
+      164.0277666527965
+    ],
+    "2010": [
+      109.86624089067986,
+      167.8496578922802
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 38.01777267456055,
+  "cohort_reference_year": 2015,
+  "chunk": 256,
+  "select_seconds": 215.90571880340576,
+  "stream_seconds": 456.6038467884064
+}

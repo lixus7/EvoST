@@ -1,0 +1,126 @@
+{
+  "dataset": "PEMS03",
+  "year": 2025,
+  "seed": 51,
+  "nodes": 1859,
+  "layout": "g29",
+  "checkpoint_years": [
+    2025,
+    2020,
+    2015,
+    2010
+  ],
+  "arms": [
+    {
+      "name": "same",
+      "base": "stae",
+      "ckpt": 2025,
+      "norm": 2025,
+      "age": 0,
+      "variant": "full"
+    },
+    {
+      "name": "stale5o",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "full"
+    },
+    {
+      "name": "fit_emb",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "fit"
+    },
+    {
+      "name": "konly",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "konly"
+    },
+    {
+      "name": "c64_prof0",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "c64:prof0",
+      "history": 64
+    },
+    {
+      "name": "s_prof0_r",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "s:prof0",
+      "history": 64,
+      "restart": true
+    },
+    {
+      "name": "a_prof0_r",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "sa:prof0",
+      "history": 64,
+      "restart": true
+    },
+    {
+      "name": "x_prof0_r",
+      "base": "stae",
+      "ckpt": 2020,
+      "norm": 2020,
+      "age": 5,
+      "variant": "sx:prof0",
+      "history": 64,
+      "restart": true
+    }
+  ],
+  "reference_check": {
+    "same": {
+      "max_abs_difference": 0.00030517578125,
+      "reference_abs_max": 469.640625,
+      "windows": 2
+    },
+    "stale5o": {
+      "max_abs_difference": 0.0007171630859375,
+      "reference_abs_max": 466.1968078613281,
+      "windows": 2
+    }
+  },
+  "norm": {
+    "2025": [
+      74.00612696880513,
+      106.71775855243314
+    ],
+    "2020": [
+      91.45248648569809,
+      123.42507953143632
+    ],
+    "2015": [
+      88.31361913694133,
+      115.3490857376721
+    ],
+    "2010": [
+      95.81825741069025,
+      116.06218937148783
+    ]
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100",
+  "torch": "2.4.1+cu121",
+  "max_windows": 0,
+  "role": "primary",
+  "peak_gpu_gib": 25.181873321533203,
+  "cohort_reference_year": 2020,
+  "chunk": 256,
+  "select_seconds": 278.4703137874603,
+  "stream_seconds": 619.0058917999268
+}

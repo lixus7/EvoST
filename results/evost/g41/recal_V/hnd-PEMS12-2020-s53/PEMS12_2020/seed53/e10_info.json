@@ -1,0 +1,154 @@
+{
+  "sensors": 2420,
+  "new_sensors": 275,
+  "cold_arms": true,
+  "history": 64,
+  "event": 1024,
+  "released": 1013,
+  "tail": 11,
+  "select_windows": 1024,
+  "half": 512,
+  "gap": 24,
+  "runner": "e23_recalall",
+  "arms_note": "same, konly, s_prof0_r, a_prof0_r, r_prof0_r",
+  "mature": {
+    "network_sensors": 2145,
+    "trained_sensors": 2145,
+    "loss_sensors": 2145,
+    "fit_windows": 2048,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "windows_per_epoch": 384,
+    "batch_windows": 2,
+    "lr": 0.003,
+    "beta": null,
+    "holdout_mae": [
+      14.522529476415315,
+      12.618251663583143,
+      12.595498708012173,
+      12.545617833963128,
+      12.55669831542272,
+      12.586720507192735,
+      12.694376712270348
+    ],
+    "best_epoch": 3,
+    "mean_abs_change": 0.0430728942155838,
+    "seconds": 100.80305027961731
+  },
+  "anchors@64": {
+    "rows_read": 88,
+    "neighbours": 5,
+    "geo": true,
+    "new_sensors_without_behaviour_anchor": 0
+  },
+  "mask_counts": {
+    "same": {
+      "new_before_arrival": 472368,
+      "new_after_arrival": 16707,
+      "unmasked_new_before_arrival": 472368
+    },
+    "konly": {
+      "new_before_arrival": 472368,
+      "new_after_arrival": 16707,
+      "unmasked_new_before_arrival": 472368
+    },
+    "s_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 16707,
+      "unmasked_new_before_arrival": 472368
+    },
+    "a_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 16707,
+      "unmasked_new_before_arrival": 472368
+    },
+    "r_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 16707,
+      "unmasked_new_before_arrival": 472368
+    }
+  },
+  "event:prof0": {
+    "network_sensors": 2420,
+    "trained_sensors": 275,
+    "loss_sensors": 275,
+    "fit_windows": 1024,
+    "train_windows": 192,
+    "holdout_windows": 64,
+    "windows_per_epoch": 384,
+    "batch_windows": 2,
+    "lr": 0.003,
+    "holdout_mae": [
+      19.24808071533943,
+      14.163245944365475,
+      13.924183962886804,
+      13.891403443267134,
+      13.856779422873585,
+      13.853749431935741,
+      13.880422725458953,
+      13.914880157754762,
+      13.988300028029542
+    ],
+    "best_epoch": 5,
+    "epochs_run": 8,
+    "mean_abs_change": 0.06656581163406372,
+    "seconds": 115.7391631603241
+  },
+  "event_all:prof0": {
+    "network_sensors": 2420,
+    "trained_sensors": 2420,
+    "loss_sensors": 2420,
+    "fit_windows": 1024,
+    "train_windows": 192,
+    "holdout_windows": 64,
+    "windows_per_epoch": 384,
+    "batch_windows": 2,
+    "lr": 0.003,
+    "holdout_mae": [
+      14.294694752048345,
+      13.15670536164163,
+      13.129767246456113,
+      13.131578102284069,
+      13.104603220386851,
+      13.099291954970106,
+      13.09759141933548,
+      13.275030358111383,
+      13.174583581386617,
+      13.04367641643105,
+      13.145944920537367,
+      13.176037721883995,
+      13.254278387592148
+    ],
+    "best_epoch": 9,
+    "epochs_run": 12,
+    "mean_abs_change": 0.06844557076692581,
+    "seconds": 172.2283911705017
+  },
+  "restart:s_prof0_r": {
+    "calibrators": 275,
+    "which": "new",
+    "forecasts": "p:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 240548
+  },
+  "restart:a_prof0_r": {
+    "calibrators": 2420,
+    "which": "all",
+    "forecasts": "pa:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 1945596
+  },
+  "restart:r_prof0_r": {
+    "calibrators": 2420,
+    "which": "all",
+    "forecasts": "p:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 1945596
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "sensors": 630,
+  "new_sensors": 290,
+  "cold_arms": true,
+  "history": 64,
+  "event": 1024,
+  "released": 1013,
+  "tail": 11,
+  "select_windows": 1024,
+  "half": 512,
+  "gap": 24,
+  "fit": {
+    "checkpoint_year": 2015,
+    "budget": 2048,
+    "lr": 0.003,
+    "max_epochs": 16,
+    "patience": 3,
+    "stride": 2,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "holdout_mae": [
+      14.842593534147086,
+      10.077838468326561,
+      10.032986494352247,
+      10.0677924635781,
+      10.068906537208145,
+      10.017784188910168,
+      10.009106143444859,
+      10.035348299046298,
+      10.024575696942843,
+      10.095698789526656
+    ],
+    "best_epoch": 6,
+    "mean_abs_change": 0.05169133096933365,
+    "seconds": 33.69052267074585
+  },
+  "mature": {
+    "network_sensors": 340,
+    "trained_sensors": 340,
+    "loss_sensors": 340,
+    "fit_windows": 2048,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "beta": null,
+    "holdout_mae": [
+      14.946019084173406,
+      10.147330978856711,
+      10.04285918013354,
+      9.990954757833743,
+      9.986117542755593,
+      9.912813029373815,
+      9.980126156706524,
+      9.911062508905355,
+      9.939115888833477,
+      9.998720226433464,
+      9.978796754344824
+    ],
+    "best_epoch": 7,
+    "mean_abs_change": 0.05417174473404884,
+    "seconds": 15.515959739685059
+  },
+  "anchors@64": {
+    "rows_read": 88,
+    "neighbours": 5,
+    "geo": true,
+    "new_sensors_without_behaviour_anchor": 0
+  },
+  "mask_counts": {
+    "same": {
+      "new_before_arrival": 547491,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "stale5o": {
+      "new_before_arrival": 547491,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "fit_emb": {
+      "new_before_arrival": 547491,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "konly": {
+      "new_before_arrival": 547491,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "c64_prof0": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "s_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "a_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    },
+    "x_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 17896,
+      "unmasked_new_before_arrival": 547491
+    }
+  },
+  "event:prof0": {
+    "network_sensors": 630,
+    "trained_sensors": 290,
+    "loss_sensors": 290,
+    "fit_windows": 1024,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "holdout_mae": [
+      14.237442564016705,
+      11.452911431737217,
+      11.267028126773074,
+      11.185548891508775,
+      11.15999859898057,
+      11.142970871875901,
+      11.098828114099952,
+      11.123332765077526,
+      11.117392420891816,
+      11.094753785368473,
+      11.103473677984113,
+      11.091884238880208,
+      11.071095850075807,
+      11.067387145268857,
+      11.048664787789157,
+      11.060183376584721,
+      11.078023629558835
+    ],
+    "best_epoch": 14,
+    "epochs_run": 16,
+    "mean_abs_change": 0.09019862115383148,
+    "seconds": 51.72927498817444
+  },
+  "event_all:prof0": {
+    "network_sensors": 630,
+    "trained_sensors": 630,
+    "loss_sensors": 630,
+    "fit_windows": 1024,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "holdout_mae": [
+      13.38049596820298,
+      11.459570629112076,
+      11.252998368527406,
+      11.195513904517044,
+      11.148627233490522,
+      11.146120717751769,
+      11.12575489334919,
+      11.101882751965942,
+      11.091948220580866,
+      11.071260783427423,
+      11.081457019633238,
+      11.032764395000699,
+      11.032483021411375,
+      11.051827906489665,
+      11.037607820916831,
+      11.039594867446525
+    ],
+    "best_epoch": 12,
+    "epochs_run": 15,
+    "mean_abs_change": 0.06803632527589798,
+    "seconds": 48.95120167732239
+  },
+  "restart:s_prof0_r": {
+    "calibrators": 290,
+    "which": "new",
+    "forecasts": "p:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 281870
+  },
+  "restart:a_prof0_r": {
+    "calibrators": 630,
+    "which": "all",
+    "forecasts": "pa:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 609179
+  },
+  "event_foldB:prof0": {
+    "network_sensors": 630,
+    "trained_sensors": 290,
+    "loss_sensors": 290,
+    "fit_windows": 488,
+    "train_windows": 183,
+    "holdout_windows": 61,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "holdout_mae": [
+      9.11375335988512,
+      7.744223759143797,
+      7.583245372870539,
+      7.521835954759684,
+      7.522520588885071,
+      7.511781153345771,
+      7.495361977760322,
+      7.476107151185626,
+      7.492294356620355,
+      7.497969954342383,
+      7.47433538710786,
+      7.504875055230988,
+      7.480873201924493,
+      7.5185991887181505
+    ],
+    "best_epoch": 10,
+    "epochs_run": 13,
+    "mean_abs_change": 0.08585144579410553,
+    "seconds": 40.631805181503296
+  },
+  "event_foldA:prof0": {
+    "network_sensors": 630,
+    "trained_sensors": 290,
+    "loss_sensors": 290,
+    "fit_windows": 488,
+    "train_windows": 183,
+    "holdout_windows": 61,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "holdout_mae": [
+      10.540304172824715,
+      9.569831965059928,
+      9.521172690915876,
+      9.471105990656133,
+      9.378448174803474,
+      9.594019286762936,
+      9.494772921443758,
+      9.460127683354365
+    ],
+    "best_epoch": 4,
+    "epochs_run": 7,
+    "mean_abs_change": 0.05396800860762596,
+    "seconds": 22.024269819259644
+  },
+  "restart:x_prof0_r": {
+    "calibrators": 290,
+    "which": "new",
+    "forecasts": "o:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 281870
+  }
+}

@@ -65,7 +65,8 @@ imply that every raw array was forward-filled or backward-filled.
 
 Chronos also uses this layout by default. To keep large tensors elsewhere, set
 `A2TTA_DATA_ROOT` to the directory containing `pems03/` ... `pems12/`, and set
-`A2TTA_TFNSW_ROOT` to the TFNSW dataset directory.
+`A2TTA_TFNSW_ROOT` to the TFNSW dataset directory. The variable names date from an
+earlier version of the code.
 
 ## Regenerating from scratch
 

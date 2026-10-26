@@ -1,0 +1,39 @@
+{
+    "begin_year": 2006,
+    "end_year": 2026,
+    "dropout": 0.0,
+    "lr": 0.001,
+    "batch_size": 16,
+    "epoch": 100,
+    "gpuid": 1,
+    "loss": "mse",
+    "activation": "relu",
+    "scheduler": "epo",
+    "y_len": 12,
+    "x_len": 12,
+    "data_process": 0,
+    "raw_data_path": "data/tfnsw/RawData/",
+    "save_data_path": "data/tfnsw/FastData/",
+    "graph_path": "data/tfnsw/graph/",
+    "model_path": "log/TFNSW/",
+    "gcn": {
+        "in_channel": 12,
+        "out_channel": 12,
+        "hidden_channel": 64
+    },
+    "tcn": {
+        "in_channel": 1,
+        "out_channel": 1,
+        "kernel_size": 3,
+        "dilation": 1
+    },
+    "logname": "retrain_staeformer_tfnsw",
+    "init": false,
+    "train": 1,
+    "auto_test": 0,
+    "strategy": "retrain",
+    "detect": false,
+    "ewc": false,
+    "replay": false,
+    "method": "STAEFORMER"
+}

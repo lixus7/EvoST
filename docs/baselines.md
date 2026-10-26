@@ -1,6 +1,6 @@
-# Annual-benchmark baselines
+# Running the baselines
 
-This guide covers the conventional forecasters, continual methods, test-time calibration and time-series foundation models of the annual benchmark (Table 1 of the paper; Tables 5–8 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST runs of the same benchmark are described in [evost_annual.md](evost_annual.md).
+This guide covers the conventional forecasters, continual methods, test-time calibration and time-series foundation models of the annual benchmark (Table 1 of the paper and Tables 5–8 of the [extended version](../paper/EvoST_extended.pdf)). The EvoST runs of the same benchmark are described in [Running EvoST](run_evost.md#annual-benchmark) and [evost_annual.md](evost_annual.md).
 
 ## Environment
 
@@ -15,9 +15,11 @@ Core dependencies: `python`, `pytorch`, `torch-geometric`, `networkx`, `scipy`, 
 
 The processed tensors are large and are released separately; see [data/README.md](../data/README.md). Place tensors under `data/<dataset>/{RawData,FastData,graph}/` and the stable-ID sidecars under `data/sensor_metadata/<dataset>/<year>/sensor_metadata.csv`; the configs already point to the tensor directories.
 
+The archived baseline rows use the input preprocessing recorded for those runs, including split-specific cached statistics for the conventional baselines. The current data builder uses training-split statistics for all splits. Rebuilding the cache and retraining therefore produces a new benchmark run and is not an exact reconstruction of those archived rows. The four matched annual streams of EvoST use training-split statistics.
+
 ## Running the baselines
 
-All baselines reported in the benchmark tables are launched from `scripts/`. Each runner takes the same environment overrides: `GPU=<id>`, `SEEDS="..."`, `DATASETS="..."`, `METHODS="..."`, and `NOHUP=1` to run in the background with a timestamped log under `run_logs/`.
+All baselines reported in the benchmark tables are launched from `scripts/`. Runner options differ. The per-dataset `pemsXX_run.sh` scripts use fixed dataset and seed lists and accept `GPU` and `NOHUP` (`NOHUP=1` runs in the background with a timestamped log under `run_logs/`). The sweep scripts document their supported `DATASETS`, `METHODS` and `SEEDS` overrides in their headers. Use the direct Python entry point to run one method with a chosen seed.
 
 | Group (table column) | Methods | How to run |
 |---|---|---|
@@ -32,8 +34,8 @@ All baselines reported in the benchmark tables are launched from `scripts/`. Eac
 `scripts/pemsXX_run.sh` runs the full per-dataset pipeline end to end (Retrain → auto-link → Pretrain → Online-NN → Online-AN → TrafficStream → STKEC → EAC) and is the recommended starting point.
 
 ```bash
-# Full pipeline on PEMS05 (naive and continual baselines)
-bash scripts/pems05_run.sh
+# Full pipeline on PEMS05 (naive and continual baselines); without GPU, its three stages use GPUs 2, 0 and 1
+GPU=0 bash scripts/pems05_run.sh
 
 # STRAP-paper backbones + PECPM + STRAP, two datasets, on GPU 0
 DATASETS="PEMS04 PEMS05" GPU=0 bash scripts/baselines_pems_run.sh
@@ -50,30 +52,11 @@ python main.py --conf conf/PEMS05/eac.json --gpuid 0 --seed 51
 
 Per-year metrics for every baseline are written to `log/<DATASET>/<logname>-<seed>/<logname>.log`.
 
-The STAEFormer configuration (`conf/<DATASET>/retrain_staeformer_<dataset>.json`, run by `scripts/extra_baselines_run.sh`) also writes the per-year checkpoints that the annual EvoST runs start from: `log/<DATASET>/retrain_staeformer_<dataset>-<seed>/<year>/<loss>.pkl`, with checkpoint seeds 42–46. TFNSW checkpoints follow the same layout; the TFNSW configuration files are not part of this repository. The [cases files](../experiments/evost/annual/) list the checkpoint of every run with its SHA-256.
+The STAEFormer configuration (`conf/<DATASET>/retrain_staeformer_<dataset>.json`, run by `scripts/extra_baselines_run.sh`) also writes the per-year checkpoints that the annual EvoST runs start from: `log/<DATASET>/retrain_staeformer_<dataset>-<seed>/<year>/<loss>.pkl`, with checkpoint seeds 42–46. TFNSW checkpoints follow the same layout. Of the TFNSW configurations, the repository includes only the STAEFormer one (`conf/TFNSW/retrain_staeformer_tfnsw.json`). The [cases files](../experiments/evost/annual/) list the checkpoint of every run with its SHA-256.
 
 ## Foundation-model baselines
 
-The zero-shot (ZS) and per-year fine-tuned (FT) foundation-model columns (TimesFM-2.5, Chronos-2, Moirai-MoE, Moirai-2.0) are run from their own entry points, each in a separate conda environment because their dependencies conflict with the STGNN stack. Setup and usage are documented in [TIMESFM_README.md](../TIMESFM_README.md) and [MOIRAI_README.md](../MOIRAI_README.md).
-
-| Model | Environment setup | Entry (ZS / FT) | Configs |
-|---|---|---|---|
-| TimesFM-2.5 | `bash scripts/setup_timesfm_env.sh` | `timesfm_main.py` / `timesfm_finetune_main.py` | `conf/PEMS*/timesfm_*.json` (generated by `scripts/gen_timesfm*_configs.py`) |
-| Moirai-MoE / 2.0 | `bash scripts/setup_moirai_env.sh` | `moirai_main.py` / `moirai_finetune_main.py` | `conf/PEMS*/moirai_*.json` (generated by `scripts/gen_moirai*_configs.py`) |
-| Chronos-2 | uses the TimesFM environment | `chronos_baseline.py` / `chronos_finetune.py` | command-line arguments |
-
-```bash
-# TimesFM-2.5 zero-shot on PEMS05
-conda activate timesfm && python timesfm_main.py --conf conf/PEMS05/timesfm_pems05.json --gpuid 0
-# Moirai-MoE zero-shot on PEMS05
-conda activate moirai && python moirai_main.py --conf conf/PEMS05/moirai_moe_pems05.json --gpuid 0
-# Chronos-2 zero-shot (univariate) on PEMS05
-python chronos_baseline.py --dataset PEMS05 --gpuid 0
-```
-
-All foundation-model predictions use the same test windows and metric code as the other methods. The FT variants use a 20% per-year few-shot training slice, whereas the trained spatio-temporal baselines use the 60% training split. Foundation-model columns are therefore presented as references and are excluded from best/second-best highlighting.
-
-Wrappers: [src/model/timesfm_wrapper.py](../src/model/timesfm_wrapper.py) and [src/model/moirai_wrapper.py](../src/model/moirai_wrapper.py). TimesFM uses a RevIN patch ([timesfm_revin_patch.py](../timesfm_revin_patch.py)) to align input normalization.
+The zero-shot (ZS) and per-year fine-tuned (FT) columns of TimesFM 2.5, Chronos-2, Moirai-2.0 and Moirai-MoE run from their own entry points, each in a separate conda environment because their dependencies conflict with the baseline stack. [The foundation-model guide](foundation_models.md) covers their setup, commands and comparability. They use the same test windows and metric code as the other methods, but the FT variants train on a 20% per-year slice instead of the 60% training split, so their columns are references and are excluded from best and second-best highlighting.
 
 ## Acknowledgements
 

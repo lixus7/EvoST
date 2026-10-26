@@ -1,59 +1,44 @@
 # EvoST experiments
 
-These are the source snapshots used for identity maintenance and delayed-feedback experiments. The scientific Python code is preserved; a few docstrings replace a machine name with a generic reference. File hashes are recorded in [the release manifest](../../results/evost/manifest.json). The annual-benchmark runner is in [annual/](annual/README.md) with its own manifest; the benchmark's baseline runners and configurations are described in the [baseline guide](../../docs/baselines.md).
+This folder holds the source of the EvoST experiments in the paper. [Running EvoST](../../docs/run_evost.md) explains the inputs and gives the command for each experiment. This page explains how the folder is organized.
 
-| Directory | Study | Main entry |
-|---|---|---|
-| `g33` | Fixed-rate identity refresh and donor comparisons | `e10_refresh.py` |
-| `g34` | More districts and checkpoint ages | `e11_ages.py` |
-| `g35` | STID identity refresh | `e13_stid.py` |
-| `g36` | Graph WaveNet and adaptive adjacency | `e14_gwn.py` |
-| `g37` | Identity, shared-weight, head, and full-parameter maintenance | `e15_maintain.py` |
-| `g38` | Observation budgets and sensor initialization | `e16_budget.py`, `e17_coldstart.py` |
-| `g39` | Explicit time-input sensitivity | `e19_timeinput.py` |
-| `g40` | Scheduled refitting of new identities | `e18_handover.py` |
-| `g41` | Joint identity refitting and calibration restart | `e21_handover2.py` |
-| `g42` | EAC-style prompt and recent-data scratch controls | `e23_eac.py` |
-| `annual` | Annual benchmark: EvoST and matched controls on each year's checkpoint, ten networks | `e24_annual.py` |
+| Path | Content |
+|---|---|
+| `run.py` | Entry point of the maintenance studies: `python experiments/evost/run.py STUDY ...` |
+| `selfcheck.py` | CPU self-check of the RLS calibrator and of the delayed label release |
+| `g33/` to `g42/` | One folder per maintenance study, with the source as it ran |
+| `export_bundles.py` | Writes the checkpoint bundles the experiments read ([Running EvoST](../../docs/run_evost.md#inputs-checkpoint-bundles)) |
+| [annual/](annual/README.md) | The annual-benchmark runner, with its own manifest |
 
-The final EvoST arrival branch is `g41/a_prof0_r`. Other branches are controls and diagnostic variants. Source comments retain the original study and rule identifiers.
+## Studies
 
-## Environment
+| Study | Paper | `run.py` name | Folder | Main module |
+|---|---|---|---|---|
+| Parameter groups: identities, shared weights, output head, all parameters | Section 6.3, Figure 3 | `maintenance` | `g37` | `e15_maintain.py` |
+| EAC-style prompt and recent-data scratch controls | Section 6.3, Figure 3 | `prompt` | `g42` | `e23_eac.py` |
+| Further districts and checkpoint ages | Section 6.4, Table 2, Figure 6(d) | `age` | `g34` | `e11_ages.py` |
+| STID | Section 6.4, Table 2 | `stid` | `g35` | `e13_stid.py` |
+| Graph WaveNet | Section 6.4, Table 2 | `gwn` | `g36` | `e14_gwn.py` |
+| STAEFormer with time inputs | Section 6.4 | | `g39` | `e19_timeinput.py` |
+| Scheduled refitting of new identities, including borrow and keep | Section 6.5 | | `g40` | `e18_handover.py` |
+| Joint refitting and calibrator restart, the final arrival design | Section 6.5, Figure 13 | `arrival` | `g41` | `e21_handover2.py` |
+| Recalibration control: the new-only refit with every calibrator rebuilt | Section 6.5 | | `g41` | `e23_recalall.py` |
+| Calibrator scale restricted to the targets the arrival masks allow | Appendix A.3 | | `g41` | `e25_scale.py`, `scale_check.py` |
+| History budgets and new-sensor initialization | Section 6.8, Figure 6(c) | `budget` | `g38` | `e16_budget.py`, `e17_coldstart.py` |
+| Fixed-rate identity refresh and donor comparisons | supporting analyses | | `g33` | `e10_refresh.py` |
+| Annual benchmark | Section 6.6 | | `annual` | `e24_annual.py` |
 
-The experiment modules need Python, NumPy, and PyTorch. The saved-result renderer needs NumPy; figure rendering additionally needs Matplotlib. The repository's [environment.yaml](../../environment.yaml) contains the broader baseline stack. These standalone maintenance experiments do not require PyG.
+Figure and table numbers are those of the submission. [The overview in the main README](../../README.md#where-each-result-comes-from) also gives the extended version's.
 
-```bash
-python experiments/evost/run.py --help
-python experiments/evost/run.py maintenance --help
-python experiments/evost/selfcheck.py
-python scripts/render_evost_results.py --check
-```
+## Why the folders keep their identifiers
 
-The self-check uses small synthetic arrays on CPU. It checks RLS against batch ridge regression and checks that changing unavailable future labels leaves past forecasts unchanged. It does not train a traffic model or reproduce the paper's numerical results.
+`g33` to `g42` are the identifiers under which the runs were made. Each folder is a snapshot of the code that produced the records in `results/evost/<folder>/`, and [the release manifest](../../results/evost/manifest.json) records the SHA-256 of these files. The manifest covers the original g33–g42 source and result snapshot; it does not cover the supplementary files added later (the bundle exporter, the recalibration and scale-check runs, and the extra result files). Renaming the folders or editing the files would break that link. The folders therefore keep their names, and the module names and source comments still use the study and rule identifiers of the development record. The only edits are a few docstrings in which a machine name was replaced by a generic reference.
 
-## Run from an exported checkpoint bundle
+Within `g41`, the final EvoST arrival configuration is the branch `a_prof0_r`. The other branches are controls and diagnostic variants. `e23_recalall.py` and `e25_scale.py` run `e21_handover2.py` unchanged with one added arm or one changed scale, after the main arrival runs; their module docstrings were shortened for the release, and their records are in `results/evost/g41/recal_V/` and `results/evost/g41/scale_V/`. `scale_check.py` computes `results/evost/g41/scale_check.json` from the twelve main-panel bundles.
 
-```bash
-python experiments/evost/run.py maintenance \
-  --bundle artifacts/bundles/stae/PEMS03_2020.npz \
-  --seed 51 --out outputs/maintenance/PEMS03_2020/seed51 --device cuda:0
+## Saved records
 
-python experiments/evost/run.py prompt \
-  --bundle artifacts/bundles/stae/PEMS03_2020.npz \
-  --seed 51 --out outputs/prompt/PEMS03_2020/seed51 --device cuda:0
-
-python experiments/evost/run.py arrival \
-  --bundle artifacts/bundles/stae/PEMS03_2020.npz \
-  --seed 51 --out outputs/arrival/PEMS03_2020/seed51 --device cuda:0
-```
-
-Use a new output directory for each run; the drivers refuse to overwrite an existing one. `--max-windows` is for bounded debugging and marks outputs as a smoke test. It must be omitted for full evaluation. STID and Graph WaveNet also require `--ckpt PATH` pointing to their trained checkpoint directory.
-
-Bundles contain raw chronological splits and model arrays; large bundles and checkpoints are not included in this Git repository. The data downloads in [data/README.md](../../data/README.md) provide the benchmark data, but are not a release of these newer checkpoint bundles. [Bundle format](../../docs/evost_bundle_format.md) describes the required inputs. The committed metric records and analysis scripts can be used immediately without those bundles.
-
-## Saved results
-
-`results/evost/gXX/results_V/` preserves each completed run's metrics, completion receipt, setup, calibration selection, and fitting metadata when available. No bounded smoke runs are included. `summary.json` preserves the corresponding study summary. Some original analysis scripts also accept earlier study results to check agreement between shared control arms; their command-line options describe those inputs.
+`results/evost/<folder>/results_V/` keeps each completed run's metrics, completion receipt, setup, calibration selection and fitting metadata where available. No bounded smoke runs are included. `summary.json` holds the study summary. [scripts/check_paper_numbers.py](../../scripts/check_paper_numbers.py) recomputes the numbers of the case study, the known and unseen sensors, the recalibration control and the scale check from these records and from [results/evost/case_study/](../../results/evost/case_study/README.md). Some analysis scripts also accept the results of an earlier study to check that shared control arms agree. Their command-line options describe those inputs.
 
 ```bash
 python scripts/render_evost_results.py
@@ -61,4 +46,8 @@ python figures/evost/plot_checkpoint_age.py --output outputs/checkpoint_age.pdf
 python figures/evost/plot_graph_evo.py --out-dir outputs/graph_evolution
 ```
 
-The renderer checks the primary twelve-setting ratios and bootstrap intervals against the saved summaries before writing [the results page](../../docs/evost_results.md). The corrected graph plot uses integer node and undirected-edge counts, with average degree `2E/N` and density `2E/[N(N-1)]`.
+The renderer checks the primary twelve-setting ratios and bootstrap intervals against the saved summaries before writing [the results page](../../docs/evost_results.md). The graph plot uses integer node and undirected-edge counts, with average degree `2E/N` and density `2E/[N(N-1)]`.
+
+## Environment
+
+The experiment modules need Python, NumPy and PyTorch. The result renderer needs NumPy, and the figure scripts also need Matplotlib. The experiments do not need PyTorch Geometric or the baseline environment in [environment.yaml](../../environment.yaml).

@@ -37,7 +37,7 @@ The runner is [e24_annual.py](../experiments/evost/annual/e24_annual.py); one ru
 
 ### Zero-label fallback (PEMS06, 2005)
 
-On PEMS06 in 2005, the fitting windows contain no valid target. For this year, the five seeds keep the checkpoint identities. The calibrators take the standard deviation of the year's training inputs as their shared scale and start from zero residual coefficients. Validation only selects the calibration settings, and the test state is initialized again and absorbs only labels released under the same rule. Refresh therefore coincides with Frozen, and EvoST with Frozen+RLS, in this year. The fallback is runner c. Stages 1 and 2 ran runner b, which differs only by this branch ([runner_b_to_c.diff](../experiments/evost/annual/runner_b_to_c.diff)). The fallback is triggered only when the fitting window has no valid target, a condition no other network-year meets.
+On PEMS06 in 2005, the fitting windows contain no valid target. For this year, the five seeds keep the checkpoint identities. The calibrators take the standard deviation of the year's training inputs as their shared scale and start from zero residual coefficients. Validation only selects the calibration settings, and the test state is initialized again and absorbs only labels released under the same rule. Refresh therefore coincides with Frozen, and EvoST with Frozen+RLS, in this year. The released runner (runner c) contains this branch. The other 1,160 runs were made with the previous version (runner b), which differs only by this branch ([runner_b_to_c.diff](../experiments/evost/annual/runner_b_to_c.diff)). The fallback is triggered only when the fitting window has no valid target, a condition no other network-year meets.
 
 ## Aggregation
 
@@ -91,13 +91,5 @@ It needs only the Python standard library.
 
 ## Run a network-year
 
-A run needs an annual bundle: the `g30-stae` layout of the [bundle guide](evost_bundle_format.md#annual-benchmark-bundles) with only the same-year checkpoint. The bundles and checkpoints are not part of this repository.
+[Running EvoST](run_evost.md#annual-benchmark) gives the command, the inputs and the options. The runner's outputs are listed in [experiments/evost/annual/README.md](../experiments/evost/annual/README.md).
 
-```bash
-python experiments/evost/annual/e24_annual.py \
-  --bundle artifacts/annual/PEMS05_2005.npz --seed 51 \
-  --cases experiments/evost/annual/cases-stage2.json --role formal \
-  --out outputs/annual/PEMS05_2005/seed51 --device cuda:0
-```
-
-See [experiments/evost/annual/README.md](../experiments/evost/annual/README.md) for the outputs and options.

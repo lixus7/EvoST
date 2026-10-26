@@ -1,0 +1,155 @@
+{
+  "sensors": 1152,
+  "new_sensors": 372,
+  "cold_arms": true,
+  "history": 64,
+  "event": 1024,
+  "released": 1013,
+  "tail": 11,
+  "select_windows": 1024,
+  "half": 512,
+  "gap": 24,
+  "runner": "e23_recalall",
+  "arms_note": "same, konly, s_prof0_r, a_prof0_r, r_prof0_r",
+  "mature": {
+    "network_sensors": 780,
+    "trained_sensors": 780,
+    "loss_sensors": 780,
+    "fit_windows": 2048,
+    "train_windows": 768,
+    "holdout_windows": 256,
+    "windows_per_epoch": 768,
+    "batch_windows": 16,
+    "lr": 0.003,
+    "beta": null,
+    "holdout_mae": [
+      13.480495971817499,
+      9.823968384422892,
+      9.6779858939728,
+      9.639777469313756,
+      9.592843252572658,
+      9.708369245674264,
+      9.669345623190166,
+      9.685301079976336
+    ],
+    "best_epoch": 4,
+    "mean_abs_change": 0.04059688001871109,
+    "seconds": 36.14564919471741
+  },
+  "anchors@64": {
+    "rows_read": 88,
+    "neighbours": 5,
+    "geo": true,
+    "new_sensors_without_behaviour_anchor": 0
+  },
+  "mask_counts": {
+    "same": {
+      "new_before_arrival": 616175,
+      "new_after_arrival": 21162,
+      "unmasked_new_before_arrival": 616175
+    },
+    "konly": {
+      "new_before_arrival": 616175,
+      "new_after_arrival": 21162,
+      "unmasked_new_before_arrival": 616175
+    },
+    "s_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 21162,
+      "unmasked_new_before_arrival": 616175
+    },
+    "a_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 21162,
+      "unmasked_new_before_arrival": 616175
+    },
+    "r_prof0_r": {
+      "new_before_arrival": 0,
+      "new_after_arrival": 21162,
+      "unmasked_new_before_arrival": 616175
+    }
+  },
+  "event:prof0": {
+    "network_sensors": 1152,
+    "trained_sensors": 372,
+    "loss_sensors": 372,
+    "fit_windows": 1024,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "windows_per_epoch": 768,
+    "batch_windows": 4,
+    "lr": 0.003,
+    "holdout_mae": [
+      12.917887507822645,
+      11.681008987632913,
+      11.564396503741222,
+      11.571736659833428,
+      11.53546795250461,
+      11.471786590111984,
+      11.423225502696253,
+      11.432061800348583,
+      11.479353931865504,
+      11.386274552988299,
+      11.465574609745113,
+      11.478035307661415,
+      11.46001715132941
+    ],
+    "best_epoch": 9,
+    "epochs_run": 12,
+    "mean_abs_change": 0.09473159909248352,
+    "seconds": 106.90212345123291
+  },
+  "event_all:prof0": {
+    "network_sensors": 1152,
+    "trained_sensors": 1152,
+    "loss_sensors": 1152,
+    "fit_windows": 1024,
+    "train_windows": 384,
+    "holdout_windows": 128,
+    "windows_per_epoch": 768,
+    "batch_windows": 4,
+    "lr": 0.003,
+    "holdout_mae": [
+      11.558028213170427,
+      10.843548122423275,
+      10.797345126302194,
+      10.730383488847513,
+      10.685344159646274,
+      10.657922907269334,
+      10.691217040465334,
+      10.699593476447133,
+      10.673799090957523
+    ],
+    "best_epoch": 5,
+    "epochs_run": 8,
+    "mean_abs_change": 0.06177690252661705,
+    "seconds": 71.3789279460907
+  },
+  "restart:s_prof0_r": {
+    "calibrators": 372,
+    "which": "new",
+    "forecasts": "p:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 314572
+  },
+  "restart:a_prof0_r": {
+    "calibrators": 1152,
+    "which": "all",
+    "forecasts": "pa:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 870907
+  },
+  "restart:r_prof0_r": {
+    "calibrators": 1152,
+    "which": "all",
+    "forecasts": "p:prof0",
+    "windows": 1024,
+    "absorbed_before": 1013,
+    "forecast_calls_before": 1024,
+    "valid_node_windows": 870907
+  }
+}
